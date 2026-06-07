@@ -1,79 +1,127 @@
 'use client'
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts'
-const monthlyData = [
-  { month: 'Jan', visits: 320, revenue: 85000 }, { month: 'Feb', visits: 348, revenue: 92000 },
-  { month: 'Mar', visits: 335, revenue: 88000 }, { month: 'Apr', visits: 390, revenue: 105000 },
-  { month: 'May', visits: 425, revenue: 118000 },
-]
+import { useQuery } from '@tanstack/react-query'
+import apiClient from '@/lib/api'
+import { PageHeader } from '@/components/ui/index'
+import { BarChart, Bar, LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts'
+
 export default function ReportsPage() {
+  const { data: stats, isLoading: statsLoading } = useQuery({
+    queryKey: ['dashboard', 'stats'],
+    queryFn: () => apiClient.get('/dashboard/stats').then(r => r.data),
+    retry: 1,
+  })
+
+  const { data: revenue, isLoading: revLoading } = useQuery({
+    queryKey: ['dashboard', 'revenue'],
+    queryFn: () => apiClient.get('/dashboard/revenue').then(r => r.data),
+    retry: 1,
+  })
+
+  const { data: alerts, isLoading: alertsLoading } = useQuery({
+    queryKey: ['dashboard', 'alerts'],
+    queryFn: () => apiClient.get('/dashboard/alerts').then(r => r.data),
+    retry: 1,
+  })
+
+  const chartData = Array.isArray(revenue) ? revenue : []
+  const hasRevenue = chartData.length > 0
+
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-heading-xl font-extrabold font-poppins text-neutral-800">Reports & Analytics</h1>
-          <p className="text-body-sm text-neutral-400">Performance metrics and operational insights</p>
-        </div>
-        <button className="btn-primary btn-sm">📥 Export Report</button>
+      <PageHeader
+        title="Reports & Analytics"
+        subtitle="Live operational performance metrics"
+        action={
+          <button className="btn-primary btn-sm" onClick={() => window.print()}>
+            Export Report
+          </button>
+        }
+      />
+
+      {/* Live Stats */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        {[
+          { label: 'Active Clients',   value: stats?.activeClients,   color: '#1B6B8A' },
+          { label: 'Staff on Duty',    value: stats?.staffOnDuty,     color: '#2DA88A' },
+          { label: 'Open Incidents',   value: stats?.openIncidents,   color: '#F59E0B' },
+          { label: 'Pending Invoices', value: stats?.pendingInvoices, color: '#EF4444' },
+        ].map(s => (
+          <div key={s.label} className="card p-5" style={{ borderLeft: `4px solid ${s.color}` }}>
+            <p className="text-caption text-neutral-400 mb-1">{s.label}</p>
+            {statsLoading
+              ? <div className="skeleton h-7 w-16 rounded" />
+              : <div className="text-2xl font-extrabold font-poppins text-neutral-800">{s.value ?? '—'}</div>
+            }
+          </div>
+        ))}
       </div>
-      <div className="grid lg:grid-cols-2 gap-6">
+
+      {/* Revenue Charts */}
+      <div className="grid lg:grid-cols-2 gap-6 mb-6">
         <div className="card p-6">
-          <h3 className="text-heading-md font-poppins mb-2">Monthly Visits</h3>
-          <p className="text-caption text-neutral-400 mb-4">Total care visits completed</p>
-          <ResponsiveContainer width="100%" height={220}>
-            <BarChart data={monthlyData}>
-              <XAxis dataKey="month" tick={{ fontSize: 12, fill: '#94A3B8' }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 12, fill: '#94A3B8' }} axisLine={false} tickLine={false} />
-              <Tooltip />
-              <Bar dataKey="visits" fill="#1B6B8A" radius={[6,6,0,0]} name="Visits" />
-            </BarChart>
-          </ResponsiveContainer>
+          <h3 className="text-heading-md font-poppins mb-1">Monthly Visits</h3>
+          <p className="text-caption text-neutral-400 mb-4">Total visits completed per month</p>
+          {revLoading ? (
+            <div className="skeleton h-52 rounded-xl" />
+          ) : !hasRevenue ? (
+            <div className="h-52 flex items-center justify-center text-body-sm text-neutral-400">No data yet</div>
+          ) : (
+            <ResponsiveContainer width="100%" height={200}>
+              <BarChart data={chartData}>
+                <XAxis dataKey="month" tick={{ fontSize: 12, fill: '#94A3B8' }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fontSize: 12, fill: '#94A3B8' }} axisLine={false} tickLine={false} />
+                <Tooltip />
+                <Bar dataKey="visits" fill="#1B6B8A" radius={[4,4,0,0]} name="Visits" />
+              </BarChart>
+            </ResponsiveContainer>
+          )}
         </div>
+
         <div className="card p-6">
-          <h3 className="text-heading-md font-poppins mb-2">Revenue Trend</h3>
-          <p className="text-caption text-neutral-400 mb-4">Monthly revenue in QAR</p>
-          <ResponsiveContainer width="100%" height={220}>
-            <LineChart data={monthlyData}>
-              <XAxis dataKey="month" tick={{ fontSize: 12, fill: '#94A3B8' }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 12, fill: '#94A3B8' }} axisLine={false} tickLine={false} tickFormatter={v=>`${v/1000}K`} />
-              <Tooltip formatter={(v: number) => [`QAR ${v.toLocaleString()}`, '']} />
-              <Line type="monotone" dataKey="revenue" stroke="#2DA88A" strokeWidth={3} dot={{ fill: '#2DA88A', r: 5 }} name="Revenue" />
-            </LineChart>
-          </ResponsiveContainer>
+          <h3 className="text-heading-md font-poppins mb-1">Revenue Trend (QAR)</h3>
+          <p className="text-caption text-neutral-400 mb-4">Monthly revenue over time</p>
+          {revLoading ? (
+            <div className="skeleton h-52 rounded-xl" />
+          ) : !hasRevenue ? (
+            <div className="h-52 flex items-center justify-center text-body-sm text-neutral-400">No revenue data yet</div>
+          ) : (
+            <ResponsiveContainer width="100%" height={200}>
+              <LineChart data={chartData}>
+                <XAxis dataKey="month" tick={{ fontSize: 12, fill: '#94A3B8' }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fontSize: 12, fill: '#94A3B8' }} axisLine={false} tickLine={false} tickFormatter={v => `${v/1000}K`} />
+                <Tooltip formatter={(v: number) => [`QAR ${v.toLocaleString()}`, '']} />
+                <Line type="monotone" dataKey="revenue" stroke="#2DA88A" strokeWidth={2} dot={{ fill: '#2DA88A', r: 3 }} name="Revenue" />
+              </LineChart>
+            </ResponsiveContainer>
+          )}
         </div>
-        <div className="card p-6">
-          <h3 className="text-heading-md font-poppins mb-4">Key Performance Metrics</h3>
-          <div className="flex flex-col gap-4">
-            {[
-              { label: 'Visit Completion Rate', value: 97.2, target: 95 },
-              { label: 'On-Time Arrival Rate', value: 94.1, target: 90 },
-              { label: 'Family Satisfaction', value: 98.0, target: 95 },
-              { label: 'Documentation Compliance', value: 91.5, target: 90 },
-            ].map(kpi => (
-              <div key={kpi.label}>
-                <div className="flex justify-between mb-1"><span className="text-body-sm text-neutral-600">{kpi.label}</span><span className="text-body-sm font-bold font-poppins">{kpi.value}%</span></div>
-                <div className="h-2 bg-neutral-100 rounded-full overflow-hidden">
-                  <div className="h-full rounded-full" style={{ width: `${kpi.value}%`, background: kpi.value >= kpi.target ? '#2DA88A' : '#EF4444' }} />
-                </div>
-              </div>
-            ))}
+      </div>
+
+      {/* Alerts from API */}
+      <div className="card p-6">
+        <h3 className="text-heading-md font-poppins mb-4">Current Alerts</h3>
+        {alertsLoading ? (
+          <div className="grid grid-cols-3 gap-4">
+            {[1,2,3].map(i => <div key={i} className="skeleton h-20 rounded-2xl" />)}
           </div>
-        </div>
-        <div className="card p-6">
-          <h3 className="text-heading-md font-poppins mb-4">Incident Summary</h3>
-          <div className="grid grid-cols-2 gap-3">
-            {[
-              { label: 'Total This Month', value: '8', color: '#1B6B8A' },
-              { label: 'Resolved', value: '6', color: '#2DA88A' },
-              { label: 'Open', value: '3', color: '#F59E0B' },
-              { label: 'Critical', value: '0', color: '#EF4444' },
-            ].map(s => (
-              <div key={s.label} className="rounded-2xl p-4" style={{ background: `${s.color}10`, border: `1px solid ${s.color}30` }}>
-                <div className="text-2xl font-extrabold font-poppins" style={{ color: s.color }}>{s.value}</div>
-                <div className="text-caption text-neutral-500">{s.label}</div>
-              </div>
-            ))}
+        ) : !alerts ? (
+          <p className="text-body-sm text-neutral-400">Could not load alerts</p>
+        ) : (
+          <div className="grid grid-cols-3 gap-4">
+            <div className="rounded-2xl p-4" style={{ background: '#FEF2F2', border: '1px solid #FECACA' }}>
+              <div className="text-2xl font-extrabold font-poppins text-red-600">{alerts.overdueInvoices ?? 0}</div>
+              <p className="text-body-sm text-red-500 mt-1">Overdue Invoices</p>
+            </div>
+            <div className="rounded-2xl p-4" style={{ background: '#FFF7ED', border: '1px solid #FED7AA' }}>
+              <div className="text-2xl font-extrabold font-poppins text-orange-600">{alerts.criticalIncidents ?? 0}</div>
+              <p className="text-body-sm text-orange-500 mt-1">Critical Incidents</p>
+            </div>
+            <div className="rounded-2xl p-4" style={{ background: '#EFF6FF', border: '1px solid #BFDBFE' }}>
+              <div className="text-2xl font-extrabold font-poppins text-blue-600">{alerts.missedVisits ?? 0}</div>
+              <p className="text-body-sm text-blue-500 mt-1">Missed Visits Today</p>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   )

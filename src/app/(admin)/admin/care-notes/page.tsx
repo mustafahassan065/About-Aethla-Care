@@ -1,42 +1,60 @@
 'use client'
-const notes = [
-  { id: '1', client: 'Ahmed Al-Rashid',   caregiver: 'Maria Santos',    date: '16 May 2025', mood: 'good',      tasks: 5, vitals: true,  shared: true  },
-  { id: '2', client: 'Fatima Hassan',     caregiver: 'Ana Reyes',       date: '16 May 2025', mood: 'excellent', tasks: 4, vitals: false, shared: false },
-  { id: '3', client: 'Layla Al-Mansouri', caregiver: 'James Dela Cruz', date: '15 May 2025', mood: 'fair',      tasks: 3, vitals: true,  shared: true  },
-  { id: '4', client: 'Mohammed Al-Qah.',  caregiver: 'Sarah Johnson',   date: '15 May 2025', mood: 'good',      tasks: 6, vitals: true,  shared: false },
-]
-const moodColors: Record<string, string> = { excellent: 'badge-accent', good: 'badge-primary', fair: 'badge-warning', poor: 'badge-error' }
+import { useState } from 'react'
+import Link from 'next/link'
+import { Plus } from 'lucide-react'
+import { useCareNotes } from '@/hooks'
+import { StatusBadge, PageHeader } from '@/components/ui/index'
+
+const moodMap: Record<string, string> = { excellent: '😊', good: '🙂', fair: '😐', poor: '😔' }
+
 export default function CareNotesPage() {
+  const [page, setPage] = useState(1)
+  const { data, isLoading } = useCareNotes({ page, limit: 20 })
+
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-heading-xl font-extrabold font-poppins text-neutral-800">Care Notes</h1>
-          <p className="text-body-sm text-neutral-400">Daily care documentation from all visits</p>
+      <PageHeader
+        title="Care Notes"
+        subtitle={`${data?.total ?? 0} notes on file`}
+        action={<Link href="/admin/care-notes/new" className="btn-primary btn-sm flex items-center gap-2"><Plus size={15} /> New Note</Link>}
+      />
+
+      {isLoading ? (
+        <div className="space-y-3">{[1,2,3,4].map(i => <div key={i} className="skeleton h-24 rounded-2xl" />)}</div>
+      ) : data?.data?.length === 0 ? (
+        <div className="card p-16 text-center">
+          <div className="text-5xl mb-4">📝</div>
+          <p className="text-body-md text-neutral-400">No care notes yet. Create the first one.</p>
         </div>
-        <button className="btn-primary btn-sm">+ New Care Note</button>
-      </div>
-      <div className="card overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="data-table">
-            <thead><tr><th>Client</th><th>Caregiver</th><th>Visit Date</th><th>Mood</th><th>Tasks</th><th>Vitals</th><th>Shared</th><th>Actions</th></tr></thead>
-            <tbody>
-              {notes.map(n => (
-                <tr key={n.id}>
-                  <td className="text-body-sm font-semibold text-neutral-800">{n.client}</td>
-                  <td className="text-body-sm text-neutral-600">{n.caregiver}</td>
-                  <td className="text-body-sm text-neutral-600">{n.date}</td>
-                  <td><span className={moodColors[n.mood] || 'badge'}>{n.mood}</span></td>
-                  <td className="text-body-sm text-neutral-600">{n.tasks} completed</td>
-                  <td>{n.vitals ? <span className="badge-accent">Recorded</span> : <span className="badge">N/A</span>}</td>
-                  <td>{n.shared ? <span className="badge-accent">✓ Shared</span> : <button className="text-primary-500 text-body-sm font-semibold hover:underline">Share</button>}</td>
-                  <td><button className="btn-outline btn-sm py-1 px-3">View</button></td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      ) : (
+        <div className="space-y-3">
+          {data?.data?.map((note: any) => (
+            <div key={note._id} className="card p-5">
+              <div className="flex items-start justify-between">
+                <div className="flex items-start gap-3">
+                  <span className="text-2xl mt-0.5">{moodMap[note.mood] || '📝'}</span>
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <strong className="text-body-sm font-bold font-poppins text-neutral-800">
+                        {note.clientId?.firstName} {note.clientId?.lastName}
+                      </strong>
+                      <span className="text-neutral-300">·</span>
+                      <span className="text-caption text-neutral-400">{note.visitDate}</span>
+                      {note.familyShared && <span className="badge-accent text-xs">Shared</span>}
+                    </div>
+                    <p className="text-body-sm text-neutral-600 leading-relaxed line-clamp-2">{note.summary}</p>
+                    <div className="flex gap-3 mt-2">
+                      <span className="text-caption text-neutral-400">✓ {note.tasksCompleted?.length || 0} tasks</span>
+                      {note.vitalSigns && <span className="text-caption text-neutral-400">❤️ Vitals recorded</span>}
+                    </div>
+                  </div>
+                </div>
+                <Link href={`/admin/care-notes/${note._id}`} className="btn-outline btn-sm py-1 px-3 text-xs flex-shrink-0">View</Link>
+              </div>
+            </div>
+          ))}
         </div>
-      </div>
+      )}
     </div>
   )
 }
