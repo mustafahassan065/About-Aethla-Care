@@ -1,53 +1,66 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+
 export const metadata: Metadata = {
-  title: 'Telehealth Services in Qatar | Virtual Healthcare Doha',
-  description: 'Virtual consultations, remote chronic care support, wellness monitoring, and appointment coordination across Qatar.',
+  title: 'Telehealth Support in Qatar | Aethla Care',
+  description: 'Remote healthcare coordination and virtual consultations for families in Qatar. Telehealth support, chronic condition monitoring, and appointment management.',
 }
+
 const services = [
-  { title: 'Virtual Consultations', desc: 'Secure video and audio consultations with healthcare professionals from the comfort of home.' },
-  { title: 'Wellness Monitoring', desc: 'Remote health tracking with regular check-ins, vital sign reviews, and digital health reports.' },
-  { title: 'Remote Chronic Care Support', desc: 'Ongoing virtual support for diabetes, hypertension, and other chronic conditions.' },
-  { title: 'Appointment Coordination', desc: 'Comprehensive scheduling, preparation support, and follow-up coordination for all medical appointments.' },
-  { title: 'Prescription Management', desc: 'Medication review support, refill coordination, and digital prescription management.' },
-  { title: 'Mental Health Support', desc: 'Virtual counseling referrals and emotional wellness check-ins by trained coordinators.' },
+  { title: 'Virtual Care Consultations',    desc: 'Access to qualified healthcare professionals via video — for routine questions, follow-ups, and guidance without a clinic visit.' },
+  { title: 'Remote Health Monitoring',      desc: 'Regular remote check-ins for clients managing chronic conditions, with structured follow-up and documentation.' },
+  { title: 'Chronic Condition Support',     desc: 'Ongoing remote coordination for conditions such as diabetes, asthma, and hypertension — supporting the treating physician\'s plan.' },
+  { title: 'Appointment Coordination',      desc: 'Scheduling, reminders, and accompanying support for in-person medical appointments when needed.' },
+  { title: 'Medication Follow-Up',          desc: 'Remote monitoring of prescription adherence and coordination with the prescribing team if adjustments are needed.' },
+  { title: 'Family Communication Updates',  desc: 'Clear, regular updates to family members wherever they are, through the Aethla Care portal.' },
 ]
+
 export default function Telehealth() {
   return (
     <>
-      <section className="relative min-h-[500px] flex items-end pb-16">
+      <section className="relative min-h-[460px] flex items-end pb-16">
         <div className="absolute inset-0" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1587614382346-4ec70e388b28?w=1600&q=80&auto=format&fit=crop')", backgroundSize: 'cover', backgroundPosition: 'center' }} />
-        <div className="absolute inset-0" style={{ background: 'linear-gradient(to right, rgba(13,43,62,0.95) 0%, rgba(13,43,62,0.7) 60%, rgba(13,43,62,0.4) 100%)' }} />
+        <div className="absolute inset-0" style={{ background: 'linear-gradient(to right, rgba(13,43,62,0.92) 0%, rgba(13,43,62,0.55) 100%)' }} />
         <div className="container-max px-4 md:px-8 relative z-10 pt-20">
-          <div className="trust-pill inline-flex mb-4 text-sm"><span className="w-2 h-2 rounded-full bg-accent-400 animate-pulse-slow" /> Telehealth Support</div>
-          <h1 className="text-display-lg text-white max-w-2xl mb-4">Telehealth & Virtual Care Services in Qatar</h1>
-          <p className="text-body-lg text-white/75 max-w-lg mb-6">Connecting you to professional healthcare from the comfort of your home through secure, easy-to-use virtual platforms.</p>
-          <Link href="/contact" className="btn-accent btn-lg">Book a Virtual Consultation</Link>
+          <div className="trust-pill inline-flex mb-4"><span className="w-2 h-2 rounded-full bg-accent-400" /> Telehealth Support</div>
+          <h1 className="text-display-lg text-white max-w-2xl mb-4">Healthcare Coordination Without the Clinic Visit</h1>
+          <p className="text-body-lg text-white/75 max-w-xl">Remote consultations and ongoing health monitoring for families who need flexibility and continuity.</p>
+          <div className="flex flex-wrap gap-4 mt-8">
+            <Link href="/contact" className="btn-accent btn-lg">Set Up Telehealth Support</Link>
+          </div>
         </div>
       </section>
+
       <section className="section-pad bg-white">
         <div className="container-max">
-          <div className="grid lg:grid-cols-3 gap-12">
-            <div className="lg:col-span-2">
-              <h2 className="text-display-sm mb-8">Telehealth Services</h2>
-              <div className="flex flex-col gap-4">
-                {services.map((item) => (
-                  <div key={item.title} className="flex items-start gap-4 p-5 rounded-2xl border border-neutral-100 hover:border-primary-200 hover:bg-primary-50 transition-all">
-                    <div className="w-8 h-8 rounded-lg bg-accent-50 flex items-center justify-center text-accent-600 font-bold text-sm flex-shrink-0">✓</div>
-                    <div><strong className="block text-body-md font-semibold font-poppins text-neutral-800 mb-1">{item.title}</strong><p className="text-body-sm text-neutral-500">{item.desc}</p></div>
-                  </div>
-                ))}
-              </div>
-            </div>
+          <div className="grid lg:grid-cols-2 gap-16 items-start">
             <div>
-              <div className="card p-6 sticky top-24">
-                <div className="text-4xl mb-3">💻</div>
-                <h3 className="text-heading-xl mb-3">Healthcare at Your Fingertips</h3>
-                <p className="text-body-sm text-neutral-500 mb-5">Our telehealth platform is designed for simplicity — no technical expertise required. Access professional care from any device, anytime.</p>
-                <Link href="/contact" className="btn-primary btn-lg w-full text-center block">Book Virtual Consultation →</Link>
-              </div>
+              <div className="section-label mb-3">Remote Care</div>
+              <h2 className="text-display-sm mb-4">Continuity of Care, From Wherever You Are</h2>
+              <p className="text-body-md text-neutral-500 leading-relaxed mb-4">
+                Not every healthcare interaction requires a physical appointment. Our telehealth service gives families in Qatar structured remote access to qualified coordinators and care professionals.
+              </p>
+              <p className="text-body-md text-neutral-500 leading-relaxed">
+                Telehealth works particularly well for clients managing chronic conditions who need regular oversight but not daily in-person visits — and for family members who want to stay involved from abroad.
+              </p>
+            </div>
+            <div className="grid grid-cols-1 gap-4">
+              {services.map((s) => (
+                <div key={s.title} className="card p-5">
+                  <h4 className="text-heading-sm text-primary-500 mb-1">{s.title}</h4>
+                  <p className="text-body-sm text-neutral-500">{s.desc}</p>
+                </div>
+              ))}
             </div>
           </div>
+        </div>
+      </section>
+
+      <section className="section-pad bg-white text-center">
+        <div className="container-max max-w-2xl">
+          <h2 className="text-display-sm mb-4">Get Started with Telehealth Support</h2>
+          <p className="text-body-lg text-neutral-500 mb-8">Tell us what you need and we will put together a remote care arrangement that works for your family.</p>
+          <Link href="/contact" className="btn-primary btn-lg">Talk to a Coordinator</Link>
         </div>
       </section>
     </>

@@ -3,9 +3,9 @@ import Image from 'next/image'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'Premium Home Healthcare & Wellness Services in Qatar',
+  title: 'Home Healthcare & Family Wellness in Qatar | Aethla Care',
   description:
-    'Aethla Care delivers compassionate home healthcare in Qatar — elderly care, disability support, maternity & newborn care, telehealth, and preventative wellness services across Doha, Lusail, Al Wakrah & Al Rayyan.',
+    'Aethla Care brings personalized, in-home medical and wellness support to families across Qatar — covering elderly care, disability assistance, maternity and newborn support, telehealth, and preventative health programs in Doha, Lusail, Al Wakrah and Al Rayyan.',
 }
 
 // ── Reusable sub-components ───────────────────────────────
@@ -14,17 +14,17 @@ function HeroBadge() {
   return (
     <div className="trust-pill inline-flex mb-6">
       <span className="w-2 h-2 rounded-full bg-accent-400 animate-pulse-slow flex-shrink-0" />
-      Qatar&apos;s Most Trusted Home Healthcare Provider
+      Trusted In-Home Care, Built for Qatari Families
     </div>
   )
 }
 
 function HeroStats() {
   const stats = [
-    { value: '2,400+', label: 'Families Served' },
-    { value: '150+',   label: 'Licensed Caregivers' },
-    { value: '24/7',   label: 'Support Available' },
-    { value: '98%',    label: 'Satisfaction Rate' },
+    { value: '2,400+', label: 'Families Supported' },
+    { value: '150+',   label: 'Verified Caregivers' },
+    { value: '24/7',   label: 'On-Call Coordination' },
+    { value: '98%',    label: 'Family Satisfaction' },
   ]
   return (
     <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-10 pt-10 border-t border-white/15">
@@ -40,11 +40,11 @@ function HeroStats() {
 
 function TrustBar() {
   const items = [
-    { icon: '🏅', title: 'Licensed Professionals', sub: 'MoH certified caregivers' },
-    { icon: '🕐', title: '24/7 Support',           sub: 'Always available for you' },
-    { icon: '🌍', title: 'Multilingual Teams',     sub: 'Arabic, English & more' },
-    { icon: '📋', title: 'Personalized Plans',     sub: 'Tailored to every family' },
-    { icon: '🔒', title: 'Secure Monitoring',      sub: 'Real-time digital care tracking' },
+    { icon: '🏅', title: 'MoH-Verified Team',     sub: 'Every caregiver fully credentialed' },
+    { icon: '🕐', title: 'Round-the-Clock Care',  sub: 'A coordinator is always reachable' },
+    { icon: '🌍', title: 'Multilingual Staff',    sub: 'Care in Arabic, English & beyond' },
+    { icon: '📋', title: 'Tailored Care Plans',   sub: 'Built around your family\'s needs' },
+    { icon: '🔒', title: 'Transparent Tracking',  sub: 'Live updates through our portal' },
   ]
   return (
     <div style={{ background: '#134F66' }} className="py-5 px-4 md:px-8">
@@ -70,102 +70,102 @@ function TrustBar() {
 const services = [
   {
     href: '/services/elderly-care',
-    icon: '👴', tag: 'Most Popular',
+    icon: '👴', tag: 'Most Requested',
     title: 'Elderly Care',
-    desc: 'Professional in-home support promoting independence, dignity, and quality of life for seniors.',
+    desc: 'Day-to-day support at home that helps seniors stay independent, comfortable, and safe.',
     img: 'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=600&q=80&auto=format&fit=crop',
   },
   {
     href: '/services/maternity-care',
     icon: '🤱', tag: null,
     title: 'Maternity Care',
-    desc: 'Postnatal recovery support, mother wellness monitoring, and lactation guidance at home.',
+    desc: 'Hands-on recovery support for new mothers, with wellness checks and feeding guidance.',
     img: 'https://images.unsplash.com/photo-1492725764893-90b379c2b6e7?w=600&q=80&auto=format&fit=crop',
   },
   {
     href: '/services/newborn-care',
     icon: '👶', tag: null,
     title: 'Newborn Baby Care',
-    desc: 'Expert newborn care, feeding support, and parent education from certified baby nurses.',
+    desc: 'Trained baby nurses who help with feeding routines, sleep schedules, and new-parent guidance.',
     img: 'https://images.unsplash.com/photo-1555252333-9f8e92e65df9?w=600&q=80&auto=format&fit=crop',
   },
   {
     href: '/services/disability-support',
     icon: '♿', tag: null,
     title: 'Disability Support',
-    desc: 'Compassionate daily support, personal care, and community participation assistance.',
+    desc: 'Patient, dignity-led assistance with daily routines, mobility, and getting out into the community.',
     img: 'https://images.unsplash.com/photo-1593113646773-028c64a8f1b8?w=600&q=80&auto=format&fit=crop',
   },
   {
     href: '/services/home-wellness',
     icon: '🌿', tag: null,
     title: 'Home Wellness',
-    desc: 'Preventative health, diabetes screening, nutritional counseling, and lifestyle programs.',
+    desc: 'Routine health checks, nutrition guidance, and lifestyle coaching delivered at your doorstep.',
     img: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=600&q=80&auto=format&fit=crop',
   },
   {
     href: '/services/telehealth',
     icon: '💻', tag: null,
     title: 'Telehealth Support',
-    desc: 'Virtual consultations, remote chronic care support, and appointment coordination.',
+    desc: 'Remote check-ins with care professionals plus help managing appointments and follow-ups.',
     img: 'https://images.unsplash.com/photo-1587614382346-4ec70e388b28?w=600&q=80&auto=format&fit=crop',
   },
   {
     href: '/services/patient-navigation',
     icon: '🧭', tag: null,
     title: 'Patient Navigation',
-    desc: 'Insurance guidance, healthcare navigation, and medical information interpretation.',
+    desc: 'A guide through insurance paperwork, scheduling, and understanding your treatment options.',
     img: 'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=600&q=80&auto=format&fit=crop',
   },
 ]
 
 const processSteps = [
-  { n: 1, title: 'Initial Consultation', desc: 'Free call with a care advisor to understand your needs and goals.' },
-  { n: 2, title: 'Care Assessment', desc: 'Personalized home visit and detailed care evaluation.' },
-  { n: 3, title: 'Caregiver Matching', desc: 'AI-powered matching with your ideal care professional.' },
-  { n: 4, title: 'Care Activation', desc: 'Your personalized care plan begins immediately.' },
-  { n: 5, title: 'Ongoing Updates', desc: 'Continuous monitoring, family updates & plan adjustments.' },
+  { n: 1, title: 'Tell Us What You Need',   desc: 'A short call with a care coordinator to understand your situation and goals.' },
+  { n: 2, title: 'Home Care Assessment',    desc: 'We visit in person to evaluate needs and outline the right level of support.' },
+  { n: 3, title: 'Caregiver Matching',      desc: 'We pair you with a caregiver based on language, skills, and personality fit.' },
+  { n: 4, title: 'Care Begins',             desc: 'Your care plan starts, with everything documented from day one.' },
+  { n: 5, title: 'Ongoing Check-ins',       desc: 'Regular reviews and family updates so the plan keeps working for you.' },
 ]
 
 const testimonials = [
   {
     initials: 'FM', name: 'Fatima Al-Mansouri', location: 'Doha · Elderly Care',
-    text: 'Aethla Care provided exceptional support for my mother after her hip surgery. The caregivers were compassionate, professional, and incredibly reliable. We could not imagine going through recovery without them.',
+    text: 'After my mother\'s hip surgery, the team stepped in within two days. Her caregiver was patient, attentive, and genuinely warm — recovery would have been so much harder without that support.',
   },
   {
     initials: 'KA', name: 'Khalid & Aisha Al-Rashid', location: 'Lusail · Newborn Care',
-    text: 'As first-time parents we were overwhelmed. The newborn care specialist from Aethla was a lifesaver — patient, knowledgeable, and so caring with our baby. We felt supported every single step of the way.',
+    text: 'We had no idea what we were doing as new parents. Our newborn specialist walked us through feeding and sleep routines calmly, and our baby took to her right away. It made those first weeks far less stressful.',
   },
   {
     initials: 'SQ', name: 'Sara Al-Qahtani', location: 'Al Rayyan · Elderly Care',
-    text: "The family portal is brilliant — I can see my father's schedule, read daily notes, and message the caregiver from my phone. The transparency gave me complete peace of mind even while I was working abroad.",
+    text: 'Being abroad for work, I worried constantly about my father. Now I can check his schedule and daily notes from my phone whenever I want. That visibility changed everything for our family.',
   },
 ]
 
 const faqs = [
   {
-    q: 'What home healthcare services does Aethla Care provide in Qatar?',
-    a: 'Aethla Care provides elderly care, disability support, maternity care, newborn care, telehealth coordination, patient navigation, and preventative wellness services across Qatar including Doha, Lusail, Al Wakrah, and Al Rayyan.',
+    q: 'What kind of home healthcare does Aethla Care offer in Qatar?',
+    a: 'We provide elderly care, disability support, maternity and newborn care, telehealth coordination, patient navigation, and preventative wellness programs — available across Doha, Lusail, Al Wakrah, and Al Rayyan.',
   },
   {
-    q: 'Do you provide live-in caregivers in Doha?',
-    a: 'Yes, Aethla Care offers both live-in and scheduled caregiver support. We tailor the arrangement to your family\'s specific needs and preferences.',
+    q: 'Can I arrange a live-in caregiver?',
+    a: 'Yes. We offer both live-in arrangements and scheduled visits, and we\'ll help you decide which fits your household best.',
   },
   {
-    q: 'Is your care team multilingual?',
-    a: 'Yes — our caregivers and coordinators support Arabic, English, Tagalog, Hindi, Urdu, and more to serve Qatar\'s diverse community.',
+    q: 'Do your caregivers speak languages other than Arabic?',
+    a: 'Our team includes speakers of Arabic, English, Tagalog, Hindi, Urdu, and other languages, so communication is rarely a barrier.',
   },
   {
-    q: 'Are your caregivers licensed and verified?',
-    a: 'Absolutely. All professionals undergo Qatar Ministry of Health verification, thorough background checks, and continuous training before placement.',
+    q: 'How are caregivers vetted before placement?',
+    a: 'Every caregiver completes Ministry of Health verification, a background check, and ongoing training before being matched with a family.',
   },
   {
-    q: 'How does the family portal work?',
-    a: 'Our secure portal lets you view care schedules, read daily care notes, receive caregiver updates, access billing, and communicate directly with your care team — from any device.',
+    q: 'What can I do through the family portal?',
+    a: 'You can view upcoming visits, read care notes after each session, see billing details, and stay in touch with your care coordinator — all from one place.',
   },
   {
-    q: 'How quickly can care services begin?',
-    a: 'Following consultation and assessment, services typically begin within 24–48 hours. For urgent needs we offer expedited placement.',
+    q: 'How soon can care start after I get in touch?',
+    a: 'Most families begin receiving care within 24–48 hours of their initial assessment. If the situation is urgent, we can often move faster.',
   },
 ]
 
@@ -198,15 +198,15 @@ export default function HomePage() {
             <div>
               <HeroBadge />
               <h1 className="text-display-lg text-white mb-5 animate-fade-in-up">
-                Compassionate Care.<br />
-                <span className="gradient-text">Delivered at Home.</span>
+                Care That Feels Like<br />
+                <span className="gradient-text">Family, At Home.</span>
               </h1>
               <p className="text-body-lg text-white/75 mb-8 max-w-lg leading-relaxed animate-fade-in-up animation-delay-100">
-                Aethla Care delivers premium, personalized home healthcare — elderly support, disability assistance, maternity &amp; newborn care, and wellness — across Qatar with a technology-driven approach.
+                From a parent recovering at home to a newborn&apos;s first weeks, Aethla Care connects Qatari households with skilled caregivers and a platform that keeps everyone informed — every step of the way.
               </p>
               <div className="flex flex-wrap gap-4 animate-fade-in-up animation-delay-200">
                 <Link href="/contact" className="btn-accent btn-lg">
-                  📋 Book a Free Consultation
+                  Book a Free Consultation
                 </Link>
                 <a
                   href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER}`}
@@ -214,7 +214,7 @@ export default function HomePage() {
                   rel="noopener noreferrer"
                   className="btn-ghost btn-lg"
                 >
-                  💬 Speak to a Care Advisor
+                  Talk to a Care Coordinator
                 </a>
               </div>
               <HeroStats />
@@ -233,12 +233,12 @@ export default function HomePage() {
                 />
                 <div className="p-5">
                   <div className="flex flex-wrap gap-2 mb-3">
-                    {['✓ Licensed Professionals', '✓ Multilingual Teams', '✓ Personalized Plans'].map((b) => (
+                    {['Verified Caregivers', 'Multilingual Support', 'Plans Built Around You'].map((b) => (
                       <span key={b} className="trust-pill text-xs">{b}</span>
                     ))}
                   </div>
-                  <p className="text-body-sm font-semibold font-poppins text-white mb-1">Comprehensive Home Healthcare</p>
-                  <p className="text-caption text-white/60">From elderly care to newborn support — every stage of life</p>
+                  <p className="text-body-sm font-semibold font-poppins text-white mb-1">Care Across Every Life Stage</p>
+                  <p className="text-caption text-white/60">From newborn support to senior care — one trusted team</p>
                 </div>
               </div>
 
@@ -270,10 +270,10 @@ export default function HomePage() {
       <section className="section-pad" id="services">
         <div className="container-max">
           <div className="section-header">
-            <div className="section-label justify-center mb-3">Our Services</div>
-            <h2 className="text-display-sm mb-4">Care for Every Stage of Life</h2>
+            <div className="section-label justify-center mb-3">What We Offer</div>
+            <h2 className="text-display-sm mb-4">Support Designed Around Your Family</h2>
             <p className="text-body-lg text-neutral-500">
-              From newborns to seniors, compassionate and professional home care tailored to every individual across Qatar.
+              Whether you&apos;re welcoming a new baby or caring for an aging parent, our caregivers bring the right skills to your home.
             </p>
           </div>
 
@@ -310,9 +310,9 @@ export default function HomePage() {
             {/* CTA card */}
             <div className="rounded-3xl border-2 border-accent-300 flex flex-col justify-center items-center text-center p-8" style={{ background: 'linear-gradient(135deg, var(--color-primary-light), var(--color-accent-light))' }}>
               <div className="text-5xl mb-4">✨</div>
-              <h3 className="text-heading-md text-primary-500 mb-2">Not sure which service?</h3>
-              <p className="text-body-sm text-neutral-500 mb-5">Our care advisors will guide you to the perfect plan for your family.</p>
-              <Link href="/contact" className="btn-primary btn-sm">Get Free Assessment</Link>
+              <h3 className="text-heading-md text-primary-500 mb-2">Not sure where to start?</h3>
+              <p className="text-body-sm text-neutral-500 mb-5">Speak with a coordinator and we&apos;ll recommend the right type of support for your situation.</p>
+              <Link href="/contact" className="btn-primary btn-sm">Get a Free Assessment</Link>
             </div>
           </div>
         </div>
@@ -347,17 +347,17 @@ export default function HomePage() {
 
             {/* Content */}
             <div>
-              <div className="section-label mb-3">Why Aethla Care</div>
-              <h2 className="text-display-sm mb-4">Redefining Home Healthcare in Qatar</h2>
+              <div className="section-label mb-3">Why Families Choose Us</div>
+              <h2 className="text-display-sm mb-4">Care You Can Actually Keep Track Of</h2>
               <p className="text-body-lg text-neutral-500 mb-8">
-                We combine the warmth of human compassion with the precision of modern technology to deliver care that truly makes a difference.
+                Good caregivers matter most — but so does knowing what&apos;s happening when you can&apos;t be there. We built our platform to give families that visibility.
               </p>
               <div className="flex flex-col gap-4">
                 {[
-                  { icon: '🤖', title: 'AI-Powered Caregiver Matching', desc: 'Intelligent matching based on language, cultural compatibility, skills, and availability.' },
-                  { icon: '📱', title: 'Real-Time Family Portal', desc: 'Schedules, care notes, caregiver updates, and billing — all in one secure platform.' },
-                  { icon: '🌐', title: 'Multilingual Care Teams', desc: 'Arabic, English, Tagalog, Hindi, Urdu and more — every family feels at home.' },
-                  { icon: '✅', title: 'Licensed & Verified Professionals', desc: 'MoH verification, background checks, and continuous professional training.' },
+                  { icon: '🤖', title: 'Smarter Caregiver Matching', desc: 'We consider language, personality, and household needs before making an introduction.' },
+                  { icon: '📱', title: 'A Portal Built for Families', desc: 'Check schedules, read visit notes, and review invoices — all from your phone.' },
+                  { icon: '🌐', title: 'Care in Your Language', desc: 'Our team speaks Arabic, English, Tagalog, Hindi, Urdu, and more.' },
+                  { icon: '✅', title: 'Verified, Trained Caregivers', desc: 'Every team member passes Ministry of Health checks and ongoing training.' },
                 ].map((f) => (
                   <div key={f.title} className="card card-hover flex gap-4 p-5 items-start">
                     <div className="w-12 h-12 rounded-xl bg-primary-50 flex items-center justify-center text-2xl flex-shrink-0">{f.icon}</div>
@@ -377,9 +377,9 @@ export default function HomePage() {
       <section className="section-pad bg-white">
         <div className="container-max">
           <div className="section-header">
-            <div className="section-label justify-center mb-3">How It Works</div>
-            <h2 className="text-display-sm mb-4">Your Care Journey in 5 Simple Steps</h2>
-            <p className="text-body-lg text-neutral-500">From your first call to ongoing care, we&apos;re with you every step of the way.</p>
+            <div className="section-label justify-center mb-3">Getting Started</div>
+            <h2 className="text-display-sm mb-4">From First Call to Ongoing Care</h2>
+            <p className="text-body-lg text-neutral-500">Here&apos;s what working with Aethla Care typically looks like.</p>
           </div>
 
           <div className="relative grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-6 mt-12">
@@ -405,9 +405,9 @@ export default function HomePage() {
       <section className="section-pad" style={{ background: 'var(--color-bg-soft)' }}>
         <div className="container-max">
           <div className="section-header">
-            <div className="section-label justify-center mb-3">Testimonials</div>
-            <h2 className="text-display-sm mb-4">Trusted by Families Across Qatar</h2>
-            <p className="text-body-lg text-neutral-500">Real stories from real families who found peace of mind with Aethla Care.</p>
+            <div className="section-label justify-center mb-3">In Their Words</div>
+            <h2 className="text-display-sm mb-4">Stories From Families We&apos;ve Worked With</h2>
+            <p className="text-body-lg text-neutral-500">A few of the experiences families have shared with us.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {testimonials.map((t) => (
@@ -434,18 +434,18 @@ export default function HomePage() {
         <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '32px 32px' }} />
         <div className="container-max relative z-10">
           <div className="section-header">
-            <div className="section-label justify-center mb-3" style={{ color: '#5DD6B8' }}>Our Technology</div>
-            <h2 className="text-display-sm text-white mb-4">Technology-Driven Home Healthcare</h2>
-            <p className="text-body-lg text-white/65">Our integrated platform ensures every aspect of care is transparent, trackable, and seamlessly coordinated.</p>
+            <div className="section-label justify-center mb-3" style={{ color: '#5DD6B8' }}>Behind the Scenes</div>
+            <h2 className="text-display-sm text-white mb-4">The Platform That Keeps Care Organized</h2>
+            <p className="text-body-lg text-white/65">A few of the tools our coordinators and caregivers use to keep your care plan running smoothly.</p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {[
-              { icon: '📍', title: 'Real-Time Care Tracking', desc: 'GPS-verified check-ins and live schedule updates so families always know what\'s happening.' },
-              { icon: '🔐', title: 'Secure Family Portal', desc: 'Encrypted, role-based access to care notes, schedules, billing, and direct messaging.' },
-              { icon: '🤖', title: 'AI Caregiver Matching', desc: 'Smart algorithms matching clients with caregivers based on language, skills, and compatibility.' },
-              { icon: '📝', title: 'Digital Care Notes', desc: 'Mobile documentation with photo uploads, voice-to-text, and instant family sharing.' },
-              { icon: '📅', title: 'Smart Scheduling', desc: 'Automated rostering, shift management, and real-time alerts for seamless coordination.' },
-              { icon: '💬', title: 'Secure Communications', desc: 'HIPAA-inspired encrypted messaging between families, caregivers, and coordinators.' },
+              { icon: '📍', title: 'Visit Tracking', desc: 'Check-ins are logged automatically so you know when a visit started and ended.' },
+              { icon: '🔐', title: 'Private Family Access', desc: 'Each family gets a secure login to view their own care information only.' },
+              { icon: '🤖', title: 'Caregiver Matching Tool', desc: 'Helps coordinators shortlist caregivers based on language, skills, and fit.' },
+              { icon: '📝', title: 'Digital Visit Notes', desc: 'Caregivers log notes and photos after each visit, shared with the family.' },
+              { icon: '📅', title: 'Coordinated Scheduling', desc: 'Shift planning that adjusts as needs change, with alerts for any gaps.' },
+              { icon: '💬', title: 'Direct Coordinator Access', desc: 'A single point of contact for questions, changes, or concerns.' },
             ].map((t) => (
               <div key={t.title} className="glass-card p-6 hover:bg-white/15 transition-all cursor-default group">
                 <div className="text-4xl mb-4">{t.icon}</div>
@@ -456,7 +456,7 @@ export default function HomePage() {
           </div>
           <div className="text-center mt-10">
             <Link href="/technology" className="btn-white btn-lg">
-              Explore Our Technology →
+              See How It Works →
             </Link>
           </div>
         </div>
@@ -472,14 +472,14 @@ export default function HomePage() {
             <div className="absolute -top-16 -right-16 w-64 h-64 rounded-full bg-white/6" />
             <div className="absolute -bottom-20 -left-12 w-56 h-56 rounded-full bg-white/4" />
             <div className="relative z-10">
-              <h2 className="text-display-md text-white mb-4">Start Your Care Journey Today</h2>
+              <h2 className="text-display-md text-white mb-4">Ready to Talk About Your Family&apos;s Needs?</h2>
               <p className="text-body-lg text-white/80 max-w-xl mx-auto mb-8">
-                Book a free consultation and let our expert care advisors design the perfect care plan for your family. No obligation, no pressure.
+                A short conversation with our team is the first step. There&apos;s no cost and no commitment — just a clearer picture of your options.
               </p>
               <div className="flex flex-wrap gap-4 justify-center">
-                <Link href="/contact" className="btn-white btn-lg">📋 Book Free Consultation</Link>
+                <Link href="/contact" className="btn-white btn-lg">Book a Free Consultation</Link>
                 <a href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer" className="btn-ghost btn-lg">
-                  💬 WhatsApp Us Now
+                  Message Us on WhatsApp
                 </a>
               </div>
             </div>
@@ -491,9 +491,9 @@ export default function HomePage() {
       <section className="section-pad" style={{ background: 'var(--color-bg-soft)' }} id="faq">
         <div className="container-max">
           <div className="section-header">
-            <div className="section-label justify-center mb-3">FAQ</div>
-            <h2 className="text-display-sm mb-4">Frequently Asked Questions</h2>
-            <p className="text-body-lg text-neutral-500">Everything you need to know about Aethla Care&apos;s services in Qatar.</p>
+            <div className="section-label justify-center mb-3">Questions & Answers</div>
+            <h2 className="text-display-sm mb-4">Common Questions From Families</h2>
+            <p className="text-body-lg text-neutral-500">A few things people often ask before getting started.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-5xl mx-auto">
             {faqs.map((f) => (

@@ -7,13 +7,13 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Menu, X, ChevronDown, Phone, MessageCircle } from 'lucide-react'
 
 const services = [
-  { href: '/services/elderly-care',        label: 'Elderly Care',         icon: '👴' },
-  { href: '/services/disability-support',  label: 'Disability Support',   icon: '♿' },
-  { href: '/services/newborn-care',        label: 'Newborn Baby Care',     icon: '👶' },
-  { href: '/services/maternity-care',      label: 'Maternity Care',       icon: '🤱' },
-  { href: '/services/home-wellness',       label: 'Home Wellness',        icon: '🌿' },
-  { href: '/services/telehealth',          label: 'Telehealth Support',   icon: '💻' },
-  { href: '/services/patient-navigation',  label: 'Patient Navigation',   icon: '🧭' },
+  { href: '/services/elderly-care',       label: 'Elderly Care'        },
+  { href: '/services/disability-support', label: 'Disability Support'  },
+  { href: '/services/newborn-care',       label: 'Newborn Baby Care'   },
+  { href: '/services/maternity-care',     label: 'Maternity Care'      },
+  { href: '/services/home-wellness',      label: 'Home Wellness'       },
+  { href: '/services/telehealth',         label: 'Telehealth Support'  },
+  { href: '/services/patient-navigation', label: 'Patient Navigation'  },
 ]
 
 function Navbar() {
@@ -54,7 +54,7 @@ function Navbar() {
                   Aethla Care
                 </span>
                 <span className="block text-[11px] font-medium uppercase tracking-widest" style={{ color: '#7A96A4' }}>
-                  Premium Home Healthcare · Qatar
+                  Home Healthcare · Qatar
                 </span>
               </div>
             </Link>
@@ -84,16 +84,15 @@ function Navbar() {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 8 }}
                       transition={{ duration: 0.18 }}
-                      className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-72 bg-white rounded-2xl border border-neutral-100 p-2 z-50"
+                      className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-64 bg-white rounded-2xl border border-neutral-100 p-2 z-50"
                       style={{ boxShadow: '0 20px 60px rgba(27,107,138,0.16)' }}
                     >
                       {services.map((s) => (
                         <Link
                           key={s.href}
                           href={s.href}
-                          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-body-sm text-neutral-600 hover:text-primary-500 hover:bg-primary-50 transition-all"
+                          className="flex items-center px-3 py-2.5 rounded-xl text-body-sm text-neutral-600 hover:text-primary-500 hover:bg-primary-50 transition-all"
                         >
-                          <span className="text-lg">{s.icon}</span>
                           {s.label}
                         </Link>
                       ))}
@@ -147,16 +146,16 @@ function Navbar() {
           >
             <div className="flex flex-col p-6 gap-1">
               <MobileNavLink href="/" label="Home" />
-              <MobileNavLink href="/about" label="About" />
+              <MobileNavLink href="/about" label="About Us" />
               <div className="py-2 px-3">
                 <p className="text-overline text-neutral-400 mb-2">Services</p>
                 {services.map((s) => (
                   <Link
                     key={s.href}
                     href={s.href}
-                    className="flex items-center gap-3 py-2.5 text-body-sm text-neutral-600 hover:text-primary-500 transition-colors"
+                    className="flex items-center py-2.5 text-body-sm text-neutral-600 hover:text-primary-500 transition-colors"
                   >
-                    <span>{s.icon}</span> {s.label}
+                    {s.label}
                   </Link>
                 ))}
               </div>
@@ -172,19 +171,19 @@ function Navbar() {
                   rel="noopener noreferrer"
                   className="btn-outline text-center py-3"
                 >
-                  💬 WhatsApp Support
+                  WhatsApp Support
                 </a>
                 <Link href="/contact" className="btn-primary text-center py-3">
-                  📋 Book Free Consultation
+                  Book Free Consultation
                 </Link>
               </div>
 
               <div className="mt-6 p-4 rounded-2xl" style={{ background: 'var(--color-primary-light)' }}>
-                <p className="text-caption text-neutral-500 mb-1">Emergency Care Line</p>
+                <p className="text-caption text-neutral-500 mb-1">24-Hour Care Line</p>
                 <a href="tel:+97460000000" className="flex items-center gap-2 text-heading-sm font-bold font-poppins text-primary-500">
                   <Phone size={18} /> +974 6000 0000
                 </a>
-                <p className="text-caption mt-1" style={{ color: '#2DA88A' }}>Available 24/7</p>
+                <p className="text-caption mt-1" style={{ color: '#2DA88A' }}>Available around the clock</p>
               </div>
             </div>
           </motion.div>
@@ -220,6 +219,15 @@ function MobileNavLink({ href, label }: { href: string; label: string }) {
 }
 
 function Footer() {
+  const footerLinks = [
+    { href: '/about',         label: 'About Us' },
+    { href: '/technology',    label: 'Technology' },
+    { href: '/family-portal', label: 'Family Portal' },
+    { href: '/careers',       label: 'Careers' },
+    { href: '/blog',          label: 'Resources' },
+    { href: '/contact',       label: 'Contact Us' },
+  ]
+
   return (
     <footer style={{ background: '#0D2B3E' }} className="pt-20 pb-8 px-4 md:px-8">
       <div className="container-max">
@@ -234,19 +242,12 @@ function Footer() {
               >A</div>
               <div>
                 <span className="block text-lg font-extrabold font-poppins text-white">Aethla Care</span>
-                <span className="block text-[10px] font-medium uppercase tracking-widest text-white/40">Premium Home Healthcare</span>
+                <span className="block text-[10px] font-medium uppercase tracking-widest text-white/40">Home Healthcare · Qatar</span>
               </div>
             </div>
             <p className="text-body-sm text-white/55 leading-relaxed mb-6 max-w-xs">
-              Qatar&apos;s technology-enabled home healthcare and family wellness provider. Compassionate care for every generation.
+              Professional home healthcare and family wellness services across Qatar — delivered by a verified, compassionate care team.
             </p>
-            <div className="flex gap-2">
-              {['📘', '📷', '🐦', '💼'].map((icon, i) => (
-                <button key={i} className="w-9 h-9 rounded-xl flex items-center justify-center text-base transition-all hover:bg-primary-500" style={{ background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.12)' }}>
-                  {icon}
-                </button>
-              ))}
-            </div>
           </div>
 
           {/* Services */}
@@ -267,14 +268,7 @@ function Footer() {
           <div>
             <h5 className="text-body-sm font-bold font-poppins text-white mb-5">Company</h5>
             <ul className="flex flex-col gap-2.5">
-              {[
-                { href: '/about', label: 'About Us' },
-                { href: '/technology', label: 'Technology' },
-                { href: '/family-portal', label: 'Family Portal' },
-                { href: '/careers', label: 'Careers' },
-                { href: '/blog', label: 'Blog & Resources' },
-                { href: '/contact', label: 'Contact Us' },
-              ].map((l) => (
+              {footerLinks.map((l) => (
                 <li key={l.href}>
                   <Link href={l.href} className="text-body-sm text-white/55 hover:text-accent-400 transition-colors">
                     {l.label}
@@ -289,18 +283,21 @@ function Footer() {
             <h5 className="text-body-sm font-bold font-poppins text-white mb-5">Contact</h5>
             <ul className="flex flex-col gap-3">
               {[
-                { icon: '📞', text: '+974 4000 0000', href: 'tel:+97440000000' },
-                { icon: '💬', text: 'WhatsApp 24/7',  href: `https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER}` },
-                { icon: '✉️', text: 'care@aethlacare.qa', href: 'mailto:care@aethlacare.qa' },
-                { icon: '📍', text: 'West Bay, Doha, Qatar', href: '#' },
-              ].map((c, i) => (
-                <li key={i}>
-                  <a href={c.href} className="flex items-center gap-2 text-body-sm text-white/55 hover:text-accent-400 transition-colors">
-                    <span>{c.icon}</span> {c.text}
-                  </a>
+                { label: 'Phone',    value: '+974 4000 0000',        href: 'tel:+97440000000' },
+                { label: 'WhatsApp', value: 'Message Our Team',      href: `https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP_NUMBER}` },
+                { label: 'Email',    value: 'info@aethlacare.com',   href: 'mailto:info@aethlacare.com' },
+                { label: 'Location', value: 'West Bay, Doha, Qatar', href: undefined },
+              ].map((c) => (
+                <li key={c.label}>
+                  <p className="text-[11px] text-white/30 uppercase tracking-wider mb-0.5">{c.label}</p>
+                  {c.href
+                    ? <a href={c.href} className="text-body-sm text-white/55 hover:text-accent-400 transition-colors">{c.value}</a>
+                    : <p className="text-body-sm text-white/55">{c.value}</p>
+                  }
                 </li>
               ))}
             </ul>
+
             <div className="mt-5 p-4 rounded-xl" style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.10)' }}>
               <p className="text-caption text-white/40 mb-1">Emergency Care Line</p>
               <a href="tel:+97460000000" className="text-heading-sm font-bold font-poppins text-white">+974 6000 0000</a>
@@ -311,7 +308,7 @@ function Footer() {
 
         <div className="flex flex-col md:flex-row items-center justify-between gap-4 pt-8">
           <p className="text-caption text-white/35">
-            © {new Date().getFullYear()} Aethla Care. All rights reserved. Licensed by Qatar Ministry of Health.
+            &copy; {new Date().getFullYear()} Aethla Care. All rights reserved. Licensed by Qatar Ministry of Health.
           </p>
           <div className="flex gap-5">
             {['Privacy Policy', 'Terms of Service', 'Cookie Policy'].map((l) => (

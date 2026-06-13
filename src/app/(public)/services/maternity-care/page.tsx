@@ -2,78 +2,65 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
-  title: 'Maternity & Postnatal Care at Home in Qatar | Doha',
-  description: 'Professional postnatal recovery support, mother wellness monitoring, and lactation guidance at home in Qatar. Serving Doha, Lusail, Al Wakrah & Al Rayyan.',
-  keywords: ['postpartum care Qatar', 'maternity home care Doha', 'postnatal care Qatar', 'lactation support Doha'],
+  title: 'Maternity & Postnatal Care in Qatar | Aethla Care',
+  description: 'Home-based maternity and postnatal recovery support across Qatar. Wellness monitoring, lactation guidance, and emotional support for new mothers.',
 }
 
 const services = [
-  { title: 'Postnatal Recovery Support',       desc: 'Expert care to support physical recovery in the critical weeks following childbirth.' },
-  { title: 'Mother Wellness Monitoring',        desc: 'Regular health checks, vitals monitoring, and postpartum health tracking at home.' },
-  { title: 'Lactation Support Coordination',   desc: 'Guidance on breastfeeding, latch techniques, and feeding schedules from certified specialists.' },
-  { title: 'Emotional Wellbeing Support',      desc: 'Compassionate support for postpartum emotional health, including postnatal depression screening.' },
-  { title: 'Newborn Integration Support',      desc: 'Helping new mothers confidently care for their newborn while recovering their own strength.' },
-  { title: 'Household Support',                desc: 'Light household assistance so new mothers can focus fully on recovery and bonding.' },
+  { title: 'Postnatal Recovery Support',     desc: 'Hands-on assistance during the recovery period following a natural birth or caesarean section.' },
+  { title: 'Mother Wellness Monitoring',     desc: 'Regular checks on blood pressure, wound care, and general health to flag anything that needs medical attention.' },
+  { title: 'Lactation Support Coordination', desc: 'Practical help with breastfeeding positioning, supply, and connecting with a lactation consultant when needed.' },
+  { title: 'Emotional Wellbeing Support',    desc: 'Attentive care that acknowledges the emotional dimension of the postnatal period, with referrals if concerns arise.' },
+  { title: 'Household & Baby Assistance',    desc: 'Light household support and help with the baby so the mother can focus on rest and recovery.' },
+  { title: 'Family Education',               desc: 'Guidance for partners and family members on how to support the mother and care for the newborn.' },
 ]
 
 export default function MaternityCare() {
   return (
     <>
-      <section className="relative min-h-[500px] flex items-end pb-16">
+      <section className="relative min-h-[460px] flex items-end pb-16">
         <div className="absolute inset-0" style={{ backgroundImage: "url('https://images.unsplash.com/photo-1492725764893-90b379c2b6e7?w=1600&q=80&auto=format&fit=crop')", backgroundSize: 'cover', backgroundPosition: 'center' }} />
-        <div className="absolute inset-0" style={{ background: 'linear-gradient(to right, rgba(13,43,62,0.95) 0%, rgba(13,43,62,0.7) 60%, rgba(13,43,62,0.4) 100%)' }} />
+        <div className="absolute inset-0" style={{ background: 'linear-gradient(to right, rgba(13,43,62,0.92) 0%, rgba(13,43,62,0.55) 100%)' }} />
         <div className="container-max px-4 md:px-8 relative z-10 pt-20">
-          <div className="trust-pill inline-flex mb-4 text-sm"><span className="w-2 h-2 rounded-full bg-accent-400 animate-pulse-slow" /> Maternity Care Services</div>
-          <h1 className="text-display-lg text-white max-w-2xl mb-4">Postnatal & Maternity Home Care in Qatar</h1>
-          <p className="text-body-lg text-white/75 max-w-lg mb-6">Professional postpartum recovery support, mother wellness monitoring, and lactation guidance in the comfort of your home.</p>
-          <Link href="/contact" className="btn-accent btn-lg">Book Maternity Care</Link>
+          <div className="trust-pill inline-flex mb-4"><span className="w-2 h-2 rounded-full bg-accent-400" /> Maternity Care</div>
+          <h1 className="text-display-lg text-white max-w-2xl mb-4">Postnatal Support That Helps New Mothers Recover Well</h1>
+          <p className="text-body-lg text-white/75 max-w-xl">Professional, caring support at home during one of the most significant transitions in a family&apos;s life.</p>
+          <div className="flex flex-wrap gap-4 mt-8">
+            <Link href="/contact" className="btn-accent btn-lg">Arrange Postnatal Care</Link>
+          </div>
         </div>
       </section>
 
       <section className="section-pad bg-white">
         <div className="container-max">
-          <div className="grid lg:grid-cols-3 gap-12">
-            <div className="lg:col-span-2">
-              <h2 className="text-display-sm mb-8">Our Maternity Care Services</h2>
-              <div className="flex flex-col gap-4">
-                {services.map((item) => (
-                  <div key={item.title} className="flex items-start gap-4 p-5 rounded-2xl border border-neutral-100 hover:border-primary-200 hover:bg-primary-50 transition-all">
-                    <div className="w-8 h-8 rounded-lg bg-accent-50 flex items-center justify-center text-accent-600 font-bold text-sm flex-shrink-0">✓</div>
-                    <div>
-                      <strong className="block text-body-md font-semibold font-poppins text-neutral-800 mb-1">{item.title}</strong>
-                      <p className="text-body-sm text-neutral-500">{item.desc}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+          <div className="grid lg:grid-cols-2 gap-16 items-start">
             <div>
-              <div className="card p-6 sticky top-24">
-                <div className="text-4xl mb-3">🤱</div>
-                <h3 className="text-heading-xl mb-3">Supporting Every New Mother</h3>
-                <p className="text-body-sm text-neutral-500 mb-5">The postpartum period can be both beautiful and challenging. Our certified maternity specialists provide the professional and emotional support every new mother deserves.</p>
-                <ul className="flex flex-col gap-2.5 mb-6">
-                  {['Certified Postnatal Nurses', 'Lactation Consultants', 'Emotional Wellness Support', 'Multilingual Teams', '24/7 Emergency Line'].map((item) => (
-                    <li key={item} className="flex items-center gap-2 text-body-sm text-neutral-600">
-                      <span className="text-accent-500 font-bold">✓</span> {item}
-                    </li>
-                  ))}
-                </ul>
-                <Link href="/contact" className="btn-primary btn-lg w-full text-center block">Book Free Consultation →</Link>
-              </div>
+              <div className="section-label mb-3">Our Approach</div>
+              <h2 className="text-display-sm mb-4">Caring for the Mother, Not Just the Baby</h2>
+              <p className="text-body-md text-neutral-500 leading-relaxed mb-4">
+                The postnatal period demands as much attention as pregnancy itself. Our maternity care specialists help mothers recover physically, navigate the emotional adjustments, and establish early routines — all in the comfort of home.
+              </p>
+              <p className="text-body-md text-neutral-500 leading-relaxed">
+                Care plans are coordinated with the mother&apos;s obstetrician or midwife and documented through our platform so the healthcare team stays informed.
+              </p>
+            </div>
+            <div className="grid grid-cols-1 gap-4">
+              {services.map((s) => (
+                <div key={s.title} className="card p-5">
+                  <h4 className="text-heading-sm text-primary-500 mb-1">{s.title}</h4>
+                  <p className="text-body-sm text-neutral-500">{s.desc}</p>
+                </div>
+              ))}
             </div>
           </div>
         </div>
       </section>
 
-      <section className="section-pad bg-section-gradient text-center">
+      <section className="section-pad bg-white text-center">
         <div className="container-max max-w-2xl">
-          <h2 className="text-display-sm text-white mb-4">Ready for Postnatal Support?</h2>
-          <p className="text-body-lg text-white/75 mb-8">Book a free consultation and let our maternity specialists support your recovery.</p>
-          <div className="flex flex-wrap gap-4 justify-center">
-            <Link href="/contact" className="btn-white btn-lg">📋 Book Free Consultation</Link>
-            <a href="https://wa.me/97400000000" target="_blank" rel="noopener noreferrer" className="btn-ghost btn-lg">💬 WhatsApp Us</a>
-          </div>
+          <h2 className="text-display-sm mb-4">Plan Your Postnatal Care Before You Deliver</h2>
+          <p className="text-body-lg text-neutral-500 mb-8">Arranging care in advance means everything is in place from the moment you arrive home.</p>
+          <Link href="/contact" className="btn-primary btn-lg">Book a Consultation</Link>
         </div>
       </section>
     </>
