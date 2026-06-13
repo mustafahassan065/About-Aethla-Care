@@ -20,6 +20,7 @@ const sidebarNav = [
       { href: '/admin/consultations', icon: '🤷‍♂️', label: 'Consultations' },
       { href: '/admin/clients', icon: '👥', label: 'Clients' },
       { href: '/admin/staff', icon: '🏃', label: 'Staff' },
+        { href: '/admin/matching',       label: 'Caregiver Match'  },
       { href: '/admin/scheduling', icon: '📅', label: 'Scheduling' },
       { href: '/admin/care-notes', icon: '📝', label: 'Care Notes' },
     ],
@@ -28,7 +29,7 @@ const sidebarNav = [
     group: 'Operations',
     items: [
       { href: '/admin/billing', icon: '💰', label: 'Billing' },
-     
+     { href: '/admin/compliance',     label: 'Compliance'       },
       { href: '/admin/reports', icon: '📈', label: 'Reports' },
     ],
   },
