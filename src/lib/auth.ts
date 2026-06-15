@@ -1,19 +1,23 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import { authApi } from './api'
-import type { User } from '@/types'
+import apiClient from './api'
+
+interface User {
+  _id: string
+  firstName: string
+  lastName: string
+  email: string
+  role: 'admin' | 'coordinator' | 'caregiver' | 'family' | 'accountant'
+  isActive: boolean
+}
 
 interface AuthState {
   user: User | null
-  accessToken: string | null
-  refreshToken: string | null
-  isLoading: boolean
+  token: string | null
   isAuthenticated: boolean
-
-  login: (email: string, password: string) => Promise<void>
+  isLoading: boolean
+  login: (email: string, password: string) => Promise<{ role: string }>
   logout: () => Promise<void>
-  setTokens: (accessToken: string, refreshToken: string) => void
-  setUser: (user: User) => void
   initialize: () => Promise<void>
 }
 
@@ -21,28 +25,18 @@ export const useAuthStore = create<AuthState>()(
   persist(
     (set, get) => ({
       user: null,
-      accessToken: null,
-      refreshToken: null,
-      isLoading: false,
+      token: null,
       isAuthenticated: false,
+      isLoading: false,
 
-      setTokens: (accessToken, refreshToken) => {
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('aethla_access_token', accessToken)
-          localStorage.setItem('aethla_refresh_token', refreshToken)
-        }
-        set({ accessToken, refreshToken })
-      },
-
-      setUser: (user) => set({ user, isAuthenticated: true }),
-
-      login: async (email, password) => {
+      login: async (email: string, password: string) => {
         set({ isLoading: true })
         try {
-          const res = await authApi.login({ email, password })
-          const { accessToken, refreshToken, user } = res.data
-          get().setTokens(accessToken, refreshToken)
-          set({ user, isAuthenticated: true, isLoading: false })
+          const res = await apiClient.post('/auth/login', { email, password })
+          const { accessToken, user } = res.data
+          apiClient.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`
+          set({ user, token: accessToken, isAuthenticated: true, isLoading: false })
+          return { role: user.role }
         } catch (err) {
           set({ isLoading: false })
           throw err
@@ -50,37 +44,45 @@ export const useAuthStore = create<AuthState>()(
       },
 
       logout: async () => {
-        try {
-          await authApi.logout()
-        } catch {}
-        if (typeof window !== 'undefined') {
-          localStorage.removeItem('aethla_access_token')
-          localStorage.removeItem('aethla_refresh_token')
-        }
-        set({ user: null, accessToken: null, refreshToken: null, isAuthenticated: false })
-        window.location.href = '/admin/login'
+        delete apiClient.defaults.headers.common['Authorization']
+        set({ user: null, token: null, isAuthenticated: false })
       },
 
       initialize: async () => {
-        const token = typeof window !== 'undefined'
-          ? localStorage.getItem('aethla_access_token')
-          : null
-        if (!token) { set({ isAuthenticated: false }); return }
+        const { token } = get()
+        if (!token) {
+          set({ isAuthenticated: false, user: null })
+          return
+        }
         try {
-          const res = await authApi.me()
+          apiClient.defaults.headers.common['Authorization'] = `Bearer ${token}`
+          const res = await apiClient.get('/auth/me')
           set({ user: res.data, isAuthenticated: true })
         } catch {
-          set({ user: null, isAuthenticated: false, accessToken: null })
+          set({ user: null, token: null, isAuthenticated: false })
+          delete apiClient.defaults.headers.common['Authorization']
         }
       },
     }),
     {
       name: 'aethla-auth',
-      partialize: (state) => ({
-        accessToken: state.accessToken,
-        refreshToken: state.refreshToken,
-        user: state.user,
-      }),
+      partialize: (state) => ({ token: state.token, user: state.user }),
     }
   )
 )
+
+// Role-based portal URLs
+export function getPortalByRole(role: string): string {
+  switch (role) {
+    case 'admin':
+    case 'coordinator':
+    case 'accountant':
+      return '/admin/dashboard'
+    case 'caregiver':
+      return '/employee/dashboard'
+    case 'family':
+      return '/portal/dashboard'
+    default:
+      return '/admin/login'
+  }
+}

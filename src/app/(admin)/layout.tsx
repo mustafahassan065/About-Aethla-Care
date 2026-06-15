@@ -2,134 +2,106 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Bell, Search, LogOut, ChevronDown, Menu, ChevronLeft } from 'lucide-react'
+import { Menu, X, Bell, LogOut, Settings } from 'lucide-react'
+import { AdminGuard } from '@/components/shared/AdminGuard'
 import { useAuthStore } from '@/lib/auth'
 
 const sidebarNav = [
   {
     group: 'Overview',
-    items: [
-      { href: '/admin/dashboard', icon: '📊', label: 'Dashboard' },
-    ],
+    items: [{ href: '/admin/dashboard', label: 'Dashboard' }],
   },
   {
     group: 'Care Management',
     items: [
-      { href: '/admin/consultations', icon: '🤷‍♂️', label: 'Consultations' },
-      { href: '/admin/clients', icon: '👥', label: 'Clients' },
-      { href: '/admin/staff', icon: '🏃', label: 'Staff' },
-      { href: '/admin/matching',       label: 'Caregiver Match'  },
-      { href: '/admin/scheduling', icon: '📅', label: 'Scheduling' },
-      { href: '/admin/care-notes', icon: '📝', label: 'Care Notes' },
-      { href: '/admin/incidents',     label: 'Incidents'         },
+      { href: '/admin/consultations', label: 'Consultations'      },
+      { href: '/admin/clients',       label: 'Clients'            },
+      { href: '/admin/staff',         label: 'Staff'              },
+      { href: '/admin/matching',      label: 'Caregiver Matching' },
+      { href: '/admin/scheduling',    label: 'Scheduling'         },
+      { href: '/admin/care-notes',    label: 'Care Notes'         },
+      { href: '/admin/incidents',     label: 'Incidents'          },
     ],
   },
   {
     group: 'Operations',
     items: [
-      { href: '/admin/billing', icon: '💰', label: 'Billing' },
-     { href: '/admin/compliance',     label: 'Compliance'       },
-      { href: '/admin/reports', icon: '📈', label: 'Reports' },
+      { href: '/admin/billing',    label: 'Billing & Finance' },
+      { href: '/admin/compliance', label: 'Compliance'        },
+      { href: '/admin/reports',    label: 'Reports'           },
     ],
   },
   {
     group: 'Content',
     items: [
-      { href: '/admin/cms', icon: '📄', label: 'CMS' },
-      { href: '/admin/careers',       label: 'Career Applications'},
+      { href: '/admin/cms',     label: 'CMS / Blog'          },
+      { href: '/admin/careers', label: 'Career Applications' },
     ],
   },
   {
     group: 'System',
     items: [
-      { href: '/admin/users',         label: 'Users & Access'     },
-      { href: '/admin/settings',      label: 'Settings'          },
+      { href: '/admin/users',    label: 'Users & Access' },
+      { href: '/admin/settings', label: 'Settings'       },
     ],
   },
 ]
 
-/* ---------------- SIDEBAR ---------------- */
+// Pages accountant can access
+const accountantAllowed = ['/admin/billing', '/admin/reports']
 
-function Sidebar({ open, onClose, onToggle }: { open: boolean; onClose: () => void; onToggle: () => void }) {
-  const pathname = usePathname()
+function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const pathname  = usePathname()
+  const { logout, user } = useAuthStore()
+  const router    = useRouter()
+
+  // Filter nav for accountant
+  const filteredNav = sidebarNav.map(section => ({
+    ...section,
+    items: section.items.filter(item =>
+      user?.role === 'accountant'
+        ? accountantAllowed.some(p => item.href.startsWith(p))
+        : true
+    ),
+  })).filter(s => s.items.length > 0)
 
   return (
     <>
-      {/* Overlay (mobile only) */}
-      {open && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black/50 z-30 lg:hidden"
-          onClick={onClose}
-        />
-      )}
+      <AnimatePresence>
+        {open && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/50 z-30 lg:hidden" onClick={onClose} />
+        )}
+      </AnimatePresence>
 
-      <aside
-        className={`
-          fixed top-0 left-0 h-full z-40 flex flex-col
-          transition-all duration-300 ease-in-out
-          ${open ? 'translate-x-0' : '-translate-x-full'}
-          lg:translate-x-0
-        `}
-        style={{ width: '260px', background: '#0D2B3E' }}
-      >
-        {/* Logo with Toggle Button */}
+      <aside className={`fixed top-0 left-0 h-full z-40 flex flex-col transition-transform duration-300 lg:translate-x-0 ${open ? 'translate-x-0' : '-translate-x-full'}`}
+        style={{ width: '260px', background: '#0D2B3E' }}>
+
         <div className="flex items-center justify-between px-5 py-5 border-b border-white/10">
           <Link href="/admin/dashboard" className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white font-bold"
-              style={{ background: 'linear-gradient(135deg, #1B6B8A, #2DA88A)' }}>
-              A
-            </div>
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white font-bold font-poppins"
+              style={{ background: 'linear-gradient(135deg, #1B6B8A, #2DA88A)' }}>A</div>
             <div>
-              <span className="block text-sm font-extrabold text-white">Aethla Care</span>
-              <span className="block text-[10px] text-white/40 uppercase">Admin Panel</span>
+              <span className="block text-sm font-extrabold font-poppins text-white">Aethla Care</span>
+              <span className="block text-[10px] text-white/40 uppercase tracking-widest">
+                {user?.role === 'accountant' ? 'Finance Portal' : 'Admin Panel'}
+              </span>
             </div>
           </Link>
-
-          <div className="flex items-center gap-2">
-            {/* Desktop Toggle Button */}
-            <button 
-              onClick={onToggle}
-              className="hidden lg:flex items-center justify-center w-7 h-7 rounded-lg hover:bg-white/10 transition-colors text-white/60 hover:text-white"
-              title="Collapse sidebar"
-            >
-              <ChevronLeft size={18} />
-            </button>
-            
-            {/* Mobile Close Button */}
-            <button onClick={onClose} className="lg:hidden text-white/60">
-              <X size={18} />
-            </button>
-          </div>
+          <button onClick={onClose} className="lg:hidden text-white/60 hover:text-white p-1"><X size={18} /></button>
         </div>
 
-        {/* Nav */}
         <div className="flex-1 overflow-y-auto py-4 px-3">
-          {sidebarNav.map((group) => (
-            <div key={group.group} className="mb-5">
-              <p className="text-[10px] uppercase text-white/30 px-3 mb-2">
-                {group.group}
-              </p>
-
-              {group.items.map((item) => {
-                const isActive =
-                  pathname === item.href ||
-                  pathname.startsWith(item.href + '/')
-
+          {filteredNav.map((section) => (
+            <div key={section.group} className="mb-5">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-white/30 px-3 mb-1.5">{section.group}</p>
+              {section.items.map((item) => {
+                const isActive = pathname === item.href || pathname.startsWith(item.href + '/')
                 return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    onClick={onClose}
-                    className={`flex items-center gap-3 px-3 py-2 rounded-lg text-white/70 hover:bg-white/10 ${
-                      isActive ? 'bg-white/10 text-white' : ''
-                    }`}
-                  >
-                    <span>{item.icon}</span>
+                  <Link key={item.href} href={item.href} onClick={onClose}
+                    className={`sidebar-link ${isActive ? 'active' : ''} mb-0.5`}>
                     <span>{item.label}</span>
                   </Link>
                 )
@@ -138,21 +110,17 @@ function Sidebar({ open, onClose, onToggle }: { open: boolean; onClose: () => vo
           ))}
         </div>
 
-        {/* User */}
         <div className="p-3 border-t border-white/10">
-          <div className="flex items-center gap-3 p-3 rounded-xl bg-white/5">
-            <div className="w-9 h-9 rounded-full bg-green-500 flex items-center justify-center text-white font-bold">
-              AD
+          <div className="flex items-center gap-3 p-3 rounded-xl" style={{ background: 'rgba(255,255,255,0.06)' }}>
+            <div className="w-9 h-9 rounded-full bg-primary-500 flex items-center justify-center text-white font-bold text-sm">
+              {user?.firstName?.[0]}{user?.lastName?.[0]}
             </div>
-
-            <div className="flex-1">
-              <p className="text-white text-sm font-semibold">Admin User</p>
-              <p className="text-white/40 text-[11px]">admin@aethlacare.qa</p>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-white truncate">{user?.firstName} {user?.lastName}</p>
+              <p className="text-[11px] text-white/40 capitalize">{user?.role}</p>
             </div>
-
-            <button className="text-white/40">
-              <LogOut size={16} />
-            </button>
+            <button onClick={async () => { await logout(); router.push('/admin/login') }}
+              className="text-white/40 hover:text-white p-1"><LogOut size={15} /></button>
           </div>
         </div>
       </aside>
@@ -160,115 +128,36 @@ function Sidebar({ open, onClose, onToggle }: { open: boolean; onClose: () => vo
   )
 }
 
-/* ---------------- TOPBAR ---------------- */
-
-function TopBar({ onMenuClick, onToggleSidebar, sidebarCollapsed }: { onMenuClick: () => void; onToggleSidebar: () => void; sidebarCollapsed: boolean }) {
-  const [notifOpen, setNotifOpen] = useState(false)
-
-  return (
-    <header className="flex items-center gap-4 px-4 py-3 border-b bg-white">
-      <button onClick={onMenuClick} className="lg:hidden">
-        <Menu size={20} />
-      </button>
-
-      {/* Desktop Toggle Button in TopBar (Alternative) */}
-      <button 
-        onClick={onToggleSidebar}
-        className="hidden lg:flex items-center justify-center w-8 h-8 rounded-lg hover:bg-gray-100 transition-colors text-gray-600"
-        title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-      >
-        {sidebarCollapsed ? <Menu size={20} /> : <ChevronLeft size={20} />}
-      </button>
-
-      <div className="flex-1 max-w-sm">
-        <div className="flex items-center gap-2 border rounded-lg px-3 py-2">
-          <Search size={16} />
-          <input
-            placeholder="Search..."
-            className="w-full outline-none text-sm"
-          />
-        </div>
-      </div>
-
-      <div className="relative">
-        <button onClick={() => setNotifOpen(!notifOpen)}>
-          <Bell size={20} />
-        </button>
-
-        <AnimatePresence>
-          {notifOpen && (
-            <motion.div
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 8 }}
-              className="absolute right-0 top-full mt-2 w-64 bg-white shadow-lg rounded-lg p-3 z-50"
-            >
-              <p className="text-sm">No new notifications</p>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-
-      <div className="flex items-center gap-2">
-        <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white">
-          A
-        </div>
-        <ChevronDown size={14} />
-      </div>
-    </header>
-  )
-}
-
-/* ---------------- MAIN LAYOUT ---------------- */
-
-export default function AdminLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false) // New state for desktop collapse
   const pathname = usePathname()
 
-  const { isAuthenticated } = useAuthStore()
-
-  // 🚨 LOGIN PAGE: NO SIDEBAR
-  if (pathname === '/admin/login') {
-    return <>{children}</>
-  }
-
-  const toggleSidebar = () => {
-    setSidebarCollapsed(!sidebarCollapsed)
-  }
+  // Login page — no guard
+  if (pathname === '/admin/login') return <>{children}</>
 
   return (
-    <div className="flex min-h-screen">
-      {/* Sidebar with conditional width for desktop */}
-      <div 
-        className={`
-          transition-all duration-300 ease-in-out
-          ${sidebarCollapsed ? 'w-0 lg:w-0' : 'w-[260px]'}
-          hidden lg:block
-        `}
-      />
-      
-      <Sidebar 
-        open={sidebarOpen} 
-        onClose={() => setSidebarOpen(false)} 
-        onToggle={toggleSidebar}
-      />
-
-      <div className="flex-1 flex flex-col">
-        <TopBar 
-          onMenuClick={() => setSidebarOpen(true)} 
-          onToggleSidebar={toggleSidebar}
-          sidebarCollapsed={sidebarCollapsed}
-        />
-
-        <main className="p-4">
-          {children}
-        </main>
+    // Admin + Coordinator + Accountant can access admin panel
+    <AdminGuard allowedRoles={['admin', 'coordinator', 'accountant']} redirectTo="/admin/login">
+      <div className="min-h-screen bg-neutral-50">
+        <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+        <div className="lg:pl-[260px] flex flex-col min-h-screen">
+          <header className="sticky top-0 z-20 bg-white border-b border-neutral-100 flex items-center gap-4 px-4 md:px-6 h-16">
+            <button onClick={() => setSidebarOpen(true)} className="lg:hidden text-neutral-600 p-1.5 rounded-lg hover:bg-neutral-100">
+              <Menu size={22} />
+            </button>
+            <div className="ml-auto flex items-center gap-2">
+              <button className="relative p-2 rounded-xl text-neutral-600 hover:bg-neutral-100">
+                <Bell size={20} />
+                <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-red-500" />
+              </button>
+              <Link href="/admin/settings" className="p-2 rounded-xl text-neutral-600 hover:bg-neutral-100">
+                <Settings size={20} />
+              </Link>
+            </div>
+          </header>
+          <main className="flex-1 p-4 md:p-6 lg:p-8">{children}</main>
+        </div>
       </div>
-    </div>
+    </AdminGuard>
   )
 }
