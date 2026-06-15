@@ -11,37 +11,51 @@ interface AdminGuardProps {
 }
 
 export function AdminGuard({ children, allowedRoles, redirectTo }: AdminGuardProps) {
-  const { initialize, isAuthenticated, user } = useAuthStore()
+  const { initialize } = useAuthStore()
   const [checking, setChecking] = useState(true)
   const [allowed, setAllowed] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
     const check = async () => {
-      try {
-        await initialize()
-      } catch {}
+      try { await initialize() } catch {}
 
-      const state = useAuthStore.getState()
-      const isAuth = state.isAuthenticated
-      const currentUser = state.user
+      const { isAuthenticated, user } = useAuthStore.getState()
 
-      if (!isAuth || !currentUser) {
+      if (!isAuthenticated || !user) {
         router.replace(redirectTo || '/admin/login')
         setChecking(false)
         return
       }
 
+      const role = user.role
+
       if (allowedRoles && allowedRoles.length > 0) {
-        if (!allowedRoles.includes(currentUser.role)) {
-          router.replace(redirectTo || '/admin/login')
+        // Custom role check — e.g. employee or portal
+        if (!allowedRoles.includes(role)) {
+          // Redirect to correct portal based on their role
+          if (role === 'caregiver' || role === 'coordinator') {
+            router.replace('/employee/login')
+          } else if (role === 'family') {
+            router.replace('/portal/login')
+          } else {
+            router.replace(redirectTo || '/admin/login')
+          }
           setChecking(false)
           return
         }
       } else {
-        // Default admin panel — only admin/coordinator/accountant
-        if (!['admin', 'coordinator', 'accountant'].includes(currentUser.role)) {
-          router.replace('/admin/login')
+        // Default: admin panel only
+        const adminRoles = ['admin', 'accountant']
+        if (!adminRoles.includes(role)) {
+          // Send to correct portal
+          if (role === 'caregiver' || role === 'coordinator') {
+            router.replace('/employee/dashboard')
+          } else if (role === 'family') {
+            router.replace('/portal/dashboard')
+          } else {
+            router.replace('/admin/login')
+          }
           setChecking(false)
           return
         }
@@ -58,10 +72,8 @@ export function AdminGuard({ children, allowedRoles, redirectTo }: AdminGuardPro
     return (
       <div className="min-h-screen flex items-center justify-center bg-neutral-50">
         <div className="text-center">
-          <div
-            className="w-14 h-14 rounded-2xl flex items-center justify-center text-white text-xl font-bold font-poppins mx-auto mb-4"
-            style={{ background: 'linear-gradient(135deg, #1B6B8A, #2DA88A)' }}
-          >A</div>
+          <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-white text-xl font-bold font-poppins mx-auto mb-4 animate-pulse"
+            style={{ background: 'linear-gradient(135deg, #1B6B8A, #2DA88A)' }}>A</div>
           <p className="text-body-sm text-neutral-400">Verifying access...</p>
         </div>
       </div>
@@ -69,6 +81,5 @@ export function AdminGuard({ children, allowedRoles, redirectTo }: AdminGuardPro
   }
 
   if (!allowed) return null
-
   return <>{children}</>
 }
