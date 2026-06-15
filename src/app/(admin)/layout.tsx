@@ -38,11 +38,13 @@ const sidebarNav = [
     group: 'Content',
     items: [
       { href: '/admin/cms', icon: '📄', label: 'CMS' },
+      { href: '/admin/careers',       label: 'Career Applications'},
     ],
   },
   {
     group: 'System',
     items: [
+      { href: '/admin/users',         label: 'Users & Access'     },
       { href: '/admin/settings',      label: 'Settings'          },
     ],
   },
