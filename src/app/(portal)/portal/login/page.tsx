@@ -6,25 +6,29 @@ import { Eye, EyeOff, Lock, Mail } from 'lucide-react'
 import { useAuthStore } from '@/lib/auth'
 
 export default function CustomerLoginPage() {
-  const [email, setEmail] = useState('')
+  const [email, setEmail]       = useState('')
   const [password, setPassword] = useState('')
-  const [showPw, setShowPw] = useState(false)
-  const [error, setError] = useState('')
-  const { login, isLoading } = useAuthStore()
-  const router = useRouter()
+  const [showPw, setShowPw]     = useState(false)
+  const [error, setError]       = useState('')
+  const { login, isLoading }    = useAuthStore()
+  const router                  = useRouter()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
     try {
-      await login(email, password)
-      const user = useAuthStore.getState().user
-      if (!['family', 'client'].includes(user?.role || '')) {
-        setError('This portal is for family members only.')
+      const { role } = await login(email, password)
+
+      if (role === 'family') {
+        router.replace('/portal/dashboard')
+      } else if (role === 'caregiver' || role === 'coordinator') {
+        router.replace('/employee/dashboard')
+      } else if (role === 'admin' || role === 'accountant') {
+        router.replace('/admin/dashboard')
+      } else {
+        setError('Access denied for this portal.')
         useAuthStore.getState().logout()
-        return
       }
-      router.push('/portal/dashboard')
     } catch {
       setError('Invalid email or password. Please try again.')
     }
@@ -46,7 +50,7 @@ export default function CustomerLoginPage() {
 
         <div className="bg-white rounded-3xl p-8 shadow-2xl">
           <h2 className="text-heading-xl font-poppins text-neutral-800 mb-1">Welcome Back</h2>
-          <p className="text-body-sm text-neutral-400 mb-6">Sign in to view your family member&apos;s care updates</p>
+          <p className="text-body-sm text-neutral-400 mb-6">Sign in to view your family member's care updates.</p>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
@@ -57,7 +61,6 @@ export default function CustomerLoginPage() {
                   className="form-input pl-10" placeholder="your@email.com" required />
               </div>
             </div>
-
             <div>
               <label className="form-label">Password</label>
               <div className="relative">
@@ -83,10 +86,8 @@ export default function CustomerLoginPage() {
           </form>
 
           <div className="mt-5 pt-5 border-t border-neutral-100 text-center">
-            <p className="text-caption text-neutral-400 mb-1">
-              Need access? Contact your care coordinator.
-            </p>
             <p className="text-caption text-neutral-400">
+              Need access? Contact your care coordinator on{' '}
               <a href="tel:+97440000000" className="text-primary-500 hover:underline">+974 4000 0000</a>
             </p>
           </div>

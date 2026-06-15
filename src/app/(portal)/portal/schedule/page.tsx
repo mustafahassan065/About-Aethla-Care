@@ -10,35 +10,52 @@ export default function PortalSchedule() {
   const { user } = useAuthStore()
   const [date, setDate] = useState(new Date().toISOString().split('T')[0])
 
-  const { data: clientData } = useQuery({
-    queryKey: ['portal', 'client-record'],
-    queryFn: () => apiClient.get(`/clients?userId=${user?._id}&limit=1`).then(r => r.data),
+  // Get MY client record (linked to this family user)
+  const { data: client } = useQuery({
+    queryKey: ['my-client', user?._id],
+    queryFn: () => apiClient.get('/clients/me').then(r => r.data),
     enabled: !!user,
   })
-  const client = clientData?.data?.[0]
 
+  // Get visits for MY client only
   const { data, isLoading } = useQuery({
-    queryKey: ['portal', 'schedule', client?._id, date],
-    queryFn: () => apiClient.get(`/schedules?clientId=${client._id}&date=${date}&limit=50`).then(r => r.data),
+    queryKey: ['my-client-visits', client?._id, date],
+    queryFn: () => apiClient.get(`/schedules?clientId=${client._id}&date=${date}&limit=50`)
+      .then(r => r.data),
     enabled: !!client?._id,
   })
 
   const visits = data?.data || []
 
+  if (!client) {
+    return (
+      <div>
+        <PageHeader title="Visit Schedule" subtitle="Your care visit history" />
+        <div className="card p-12 text-center">
+          <p className="text-body-md text-neutral-500">Your account is not yet linked to a client record.</p>
+          <p className="text-body-sm text-neutral-400 mt-2">Contact your care coordinator to complete setup.</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div>
-      <PageHeader title="Visit Schedule" subtitle="Upcoming and past care visits" />
+      <PageHeader
+        title="Visit Schedule"
+        subtitle={`Care visits for ${client.firstName} ${client.lastName}`}
+      />
 
       <div className="card p-4 mb-5">
-        <label className="form-label">Select Date</label>
+        <label className="form-label">Date</label>
         <input type="date" value={date} onChange={e => setDate(e.target.value)} className="form-input w-auto" />
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
         {[
-          { label: 'Total',       value: visits.length,                                              color: '#1B6B8A' },
-          { label: 'Completed',   value: visits.filter((v: any) => v.status === 'completed').length,  color: '#2DA88A' },
-          { label: 'Upcoming',    value: visits.filter((v: any) => v.status === 'scheduled').length,  color: '#94A3B8' },
+          { label: 'Total',       value: visits.length,                                               color: '#1B6B8A' },
+          { label: 'Completed',   value: visits.filter((v: any) => v.status === 'completed').length,   color: '#2DA88A' },
+          { label: 'Upcoming',    value: visits.filter((v: any) => v.status === 'scheduled').length,   color: '#94A3B8' },
           { label: 'In Progress', value: visits.filter((v: any) => v.status === 'in-progress').length, color: '#F59E0B' },
         ].map(s => (
           <div key={s.label} className="card p-4" style={{ borderLeft: `4px solid ${s.color}` }}>
@@ -72,7 +89,7 @@ export default function PortalSchedule() {
                   </p>
                   {v.checkInTime && (
                     <p className="text-caption text-green-600 mt-0.5">
-                      Arrived: {new Date(v.checkInTime).toLocaleTimeString()}
+                      Arrived: {new Date(v.checkInTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                     </p>
                   )}
                 </div>

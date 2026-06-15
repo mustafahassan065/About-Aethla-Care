@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useAuthStore } from '@/lib/auth'
 import apiClient from '@/lib/api'
@@ -10,31 +9,38 @@ import Link from 'next/link'
 export default function EmployeeClients() {
   const { user } = useAuthStore()
 
-  const { data, isLoading } = useQuery({
-    queryKey: ['employee', 'clients'],
-    queryFn: async () => {
-      // Get caregiver record
-      const cgRes = await apiClient.get(`/caregivers?userId=${user?._id}&limit=1`)
-      const cg = cgRes.data?.data?.[0]
-      if (!cg) return { data: [] }
-      // Get schedules to find which clients this caregiver is assigned to
-      const schedRes = await apiClient.get(`/schedules?caregiverId=${cg._id}&limit=100`)
-      const schedules = schedRes.data?.data || []
-      // Extract unique client IDs
-      const clientIds = [...new Set(schedules.map((s: any) => s.clientId?._id).filter(Boolean))]
-      const clients = schedules
-        .map((s: any) => s.clientId)
-        .filter((c: any, i: number, arr: any[]) => c && arr.findIndex((x: any) => x?._id === c?._id) === i)
-      return { data: clients }
-    },
+  // Get MY caregiver record
+  const { data: cgData } = useQuery({
+    queryKey: ['my-cg', user?._id],
+    queryFn: () => apiClient.get('/caregivers/me').then(r => r.data),
     enabled: !!user,
   })
 
-  const clients = data?.data || []
+  // Get all MY schedules to find MY assigned clients
+  const { data: scheduleData, isLoading } = useQuery({
+    queryKey: ['my-clients', cgData?._id],
+    queryFn: () => apiClient.get(`/schedules?caregiverId=${cgData._id}&limit=200`)
+      .then(r => r.data),
+    enabled: !!cgData?._id,
+  })
+
+  // Extract unique clients from MY schedules
+  const clients = (() => {
+    const seen = new Set()
+    const result: any[] = []
+    for (const s of scheduleData?.data || []) {
+      const c = s.clientId
+      if (c && !seen.has(c._id)) {
+        seen.add(c._id)
+        result.push(c)
+      }
+    }
+    return result
+  })()
 
   return (
     <div>
-      <PageHeader title="My Clients" subtitle={`${clients.length} clients currently assigned to you`} />
+      <PageHeader title="My Clients" subtitle={`${clients.length} clients assigned to you`} />
 
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -43,6 +49,7 @@ export default function EmployeeClients() {
       ) : clients.length === 0 ? (
         <div className="card p-16 text-center">
           <p className="text-body-md text-neutral-400">No clients assigned yet.</p>
+          <p className="text-body-sm text-neutral-400 mt-2">Contact your coordinator.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -57,13 +64,17 @@ export default function EmployeeClients() {
                     </h3>
                     <StatusBadge status={client.status} />
                   </div>
-                  <p className="text-caption text-neutral-500 mb-2">
-                    {client.careType?.join(', ')} &middot; {client.address?.area || 'Doha'}
+                  <p className="text-caption text-neutral-500 mb-1">
+                    {client.careType?.join(', ')}
+                  </p>
+                  <p className="text-caption text-neutral-400">
+                    {client.address?.area || 'Doha'}, Qatar
                   </p>
                   <div className="flex gap-2 mt-3">
-                    <a href={`tel:${client.phone}`}
-                      className="btn-outline btn-sm py-1 px-3 text-xs">Call</a>
-                    <Link href={`/employee/care-notes/new?clientId=${client._id}`}
+                    {client.phone && (
+                      <a href={`tel:${client.phone}`} className="btn-outline btn-sm py-1 px-3 text-xs">Call</a>
+                    )}
+                    <Link href={`/employee/care-notes?clientId=${client._id}`}
                       className="btn-primary btn-sm py-1 px-3 text-xs">Add Note</Link>
                   </div>
                 </div>
