@@ -4,17 +4,48 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuthStore } from '@/lib/auth'
 
-export function AdminGuard({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, initialize } = useAuthStore()
+interface AdminGuardProps {
+  children: React.ReactNode
+  allowedRoles?: string[]
+  redirectTo?: string
+}
+
+export function AdminGuard({ children, allowedRoles, redirectTo }: AdminGuardProps) {
+  const { isAuthenticated, initialize, user } = useAuthStore()
   const [checking, setChecking] = useState(true)
   const router = useRouter()
 
   useEffect(() => {
     initialize().finally(() => {
-      setChecking(false)
-      if (!useAuthStore.getState().isAuthenticated) {
-        router.push('/admin/login')
+      const state = useAuthStore.getState()
+      const isAuth = state.isAuthenticated
+      const currentUser = state.user
+
+      if (!isAuth) {
+        router.push(redirectTo || '/admin/login')
+        setChecking(false)
+        return
       }
+
+      // Role check
+      if (allowedRoles && currentUser) {
+        if (!allowedRoles.includes(currentUser.role)) {
+          router.push(redirectTo || '/admin/login')
+          setChecking(false)
+          return
+        }
+      }
+
+      // Admin panel default — only allow admin/coordinator
+      if (!allowedRoles && currentUser) {
+        if (!['admin', 'coordinator'].includes(currentUser.role)) {
+          router.push('/admin/login')
+          setChecking(false)
+          return
+        }
+      }
+
+      setChecking(false)
     })
   }, [])
 

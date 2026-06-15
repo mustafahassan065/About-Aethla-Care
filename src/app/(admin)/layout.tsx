@@ -20,9 +20,10 @@ const sidebarNav = [
       { href: '/admin/consultations', icon: '🤷‍♂️', label: 'Consultations' },
       { href: '/admin/clients', icon: '👥', label: 'Clients' },
       { href: '/admin/staff', icon: '🏃', label: 'Staff' },
-        { href: '/admin/matching',       label: 'Caregiver Match'  },
+      { href: '/admin/matching',       label: 'Caregiver Match'  },
       { href: '/admin/scheduling', icon: '📅', label: 'Scheduling' },
       { href: '/admin/care-notes', icon: '📝', label: 'Care Notes' },
+      { href: '/admin/incidents',     label: 'Incidents'         },
     ],
   },
   {
@@ -37,6 +38,12 @@ const sidebarNav = [
     group: 'Content',
     items: [
       { href: '/admin/cms', icon: '📄', label: 'CMS' },
+    ],
+  },
+  {
+    group: 'System',
+    items: [
+      { href: '/admin/settings',      label: 'Settings'          },
     ],
   },
 ]
