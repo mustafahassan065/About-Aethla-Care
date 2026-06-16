@@ -10,19 +10,20 @@ import { DataTable, Column } from '@/components/ui/DataTable'
 import { X, Eye, EyeOff } from 'lucide-react'
 
 const roles = [
-  { value: 'admin',       label: 'Admin',        desc: 'Full system access'                    },
-  { value: 'coordinator', label: 'Coordinator',   desc: 'Scheduling & client management'        },
-  { value: 'caregiver',   label: 'Caregiver',     desc: 'Employee portal — care delivery'       },
-  { value: 'family',      label: 'Family Member', desc: 'Family portal — view their client only' },
-  { value: 'accountant',  label: 'Accountant',    desc: 'Finance module access'                 },
+  { value: 'admin',       label: 'Admin',          desc: 'Full system access — admin panel',            portal: '/admin/login'    },
+  { value: 'coordinator', label: 'Coordinator',    desc: 'Scheduling & client management — admin panel', portal: '/admin/login'    },
+  { value: 'caregiver',   label: 'Caregiver',      desc: 'Employee portal — care delivery',              portal: '/employee/login' },
+  { value: 'family',      label: 'Family Member',  desc: 'Family portal — view their client only',       portal: '/portal/login'   },
+  { value: 'accountant',  label: 'Accountant',     desc: 'Finance module — billing & reports',           portal: '/admin/login'    },
 ]
 
 export default function UsersPage() {
   const qc = useQueryClient()
   const [showForm, setShowForm] = useState(false)
-  const [showPw, setShowPw] = useState(false)
+  const [showPw, setShowPw]     = useState(false)
   const [filterRole, setFilterRole] = useState('')
-  const [page, setPage] = useState(1)
+  const [page, setPage]         = useState(1)
+  const [selectedRole, setSelectedRole] = useState('')
 
   const { data, isLoading } = useQuery({
     queryKey: ['users', filterRole, page],
@@ -32,44 +33,65 @@ export default function UsersPage() {
     retry: 1,
   })
 
-  const { register, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm({
-    defaultValues: { firstName: '', lastName: '', email: '', password: '', role: '', phone: '' }
+  // Clients list for family dropdown
+  const { data: clientsList } = useQuery({
+    queryKey: ['users-clients-list'],
+    queryFn: () => apiClient.get('/users/clients-list').then(r => r.data),
+    enabled: showForm && selectedRole === 'family',
   })
+
+  const { register, handleSubmit, reset, watch, setValue, formState: { errors, isSubmitting } } = useForm({
+    defaultValues: { firstName: '', lastName: '', email: '', password: '', role: '', phone: '', clientId: '' }
+  })
+
+  const watchRole = watch('role')
 
   const createMutation = useMutation({
     mutationFn: (dto: any) => apiClient.post('/users', dto).then(r => r.data),
-    onSuccess: () => {
+    onSuccess: (data) => {
       qc.invalidateQueries({ queryKey: ['users'] })
-      toast.success('User created successfully')
-      setShowForm(false)
-      reset()
+      toast.success(`User created — ${data.email}`)
+      closeForm()
     },
     onError: (e: any) => toast.error(e?.response?.data?.message || 'Failed to create user'),
   })
 
-  const toggleActiveMutation = useMutation({
+  const toggleMutation = useMutation({
     mutationFn: ({ id, isActive }: { id: string; isActive: boolean }) =>
       apiClient.patch(`/users/${id}`, { isActive }).then(r => r.data),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['users'] })
-      toast.success('User updated')
-    },
-    onError: () => toast.error('Failed to update user'),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['users'] }); toast.success('Updated') },
+    onError: () => toast.error('Failed to update'),
   })
 
-  const onSubmit = (data: any) => {
-    createMutation.mutate({ ...data, isActive: true, isVerified: true })
+  const closeForm = () => {
+    setShowForm(false)
+    setSelectedRole('')
+    setShowPw(false)
+    reset()
   }
 
-  const getPortalUrl = (role: string) => {
-    if (role === 'caregiver' || role === 'coordinator') return '/employee/login'
-    if (role === 'family') return '/portal/login'
-    return '/admin/login'
+  const onSubmit = (data: any) => {
+    const payload: any = {
+      firstName:  data.firstName,
+      lastName:   data.lastName,
+      email:      data.email,
+      password:   data.password,
+      role:       data.role,
+      phone:      data.phone || undefined,
+      isActive:   true,
+      isVerified: true,
+    }
+    if (data.role === 'family' && data.clientId) {
+      payload.clientId = data.clientId
+    }
+    createMutation.mutate(payload)
   }
+
+  const getPortal = (role: string) => roles.find(r => r.value === role)?.portal || '/admin/login'
 
   const columns: Column<any>[] = [
     {
-      key: 'firstName', header: 'Name',
+      key: 'firstName', header: 'User',
       render: (_, row) => (
         <div className="flex items-center gap-3">
           <Avatar name={`${row.firstName} ${row.lastName}`} size="sm" />
@@ -84,20 +106,23 @@ export default function UsersPage() {
       key: 'role', header: 'Role',
       render: (v) => {
         const r = roles.find(r => r.value === v)
-        return (
-          <div>
-            <span className="badge-primary text-xs capitalize">{r?.label || String(v)}</span>
-            <p className="text-caption text-neutral-400 mt-0.5">{r?.desc}</p>
-          </div>
-        )
+        return <span className="badge-primary text-xs capitalize">{r?.label || String(v)}</span>
       }
     },
     {
-      key: 'role', header: 'Portal Access',
+      key: 'linkedClient', header: 'Linked Client',
+      render: (_, row) => row.linkedClient
+        ? <span className="text-body-sm text-neutral-700">{row.linkedClient.firstName} {row.linkedClient.lastName}</span>
+        : row.role === 'family'
+          ? <span className="text-caption text-amber-500">Not linked</span>
+          : <span className="text-caption text-neutral-300">—</span>
+    },
+    {
+      key: 'role', header: 'Portal',
       render: (v) => (
-        <a href={getPortalUrl(String(v))} target="_blank" rel="noopener noreferrer"
-          className="text-body-sm text-primary-500 hover:underline font-mono text-xs">
-          {getPortalUrl(String(v))}
+        <a href={getPortal(String(v))} target="_blank" rel="noopener noreferrer"
+          className="text-caption font-mono text-primary-500 hover:underline">
+          {getPortal(String(v))}
         </a>
       )
     },
@@ -106,15 +131,11 @@ export default function UsersPage() {
       render: (v) => <StatusBadge status={v ? 'active' : 'inactive'} />
     },
     {
-      key: 'createdAt', header: 'Created',
-      render: (v) => <span className="text-caption text-neutral-400">{new Date(String(v)).toLocaleDateString()}</span>
-    },
-    {
       key: '_id', header: 'Actions',
       render: (_, row) => (
         <button
-          onClick={() => toggleActiveMutation.mutate({ id: row._id, isActive: !row.isActive })}
-          className={`btn-sm py-1 px-3 text-xs ${row.isActive ? 'btn-outline text-red-400 border-red-200 hover:bg-red-50' : 'btn-primary'}`}
+          onClick={() => toggleMutation.mutate({ id: row._id, isActive: !row.isActive })}
+          className={`btn-sm py-1 px-3 text-xs ${row.isActive ? 'btn-outline text-red-400 border-red-200' : 'btn-primary'}`}
         >
           {row.isActive ? 'Deactivate' : 'Activate'}
         </button>
@@ -126,12 +147,8 @@ export default function UsersPage() {
     <div>
       <PageHeader
         title="Users & Access"
-        subtitle="Manage all portal users — admin, staff, and family members"
-        action={
-          <button onClick={() => setShowForm(true)} className="btn-primary btn-sm">
-            + Create User
-          </button>
-        }
+        subtitle="Manage portal users — admin, staff, and family members"
+        action={<button onClick={() => setShowForm(true)} className="btn-primary btn-sm">+ Create User</button>}
       />
 
       {/* Portal Guide */}
@@ -141,9 +158,9 @@ export default function UsersPage() {
           { portal: 'Employee Portal', url: '/employee/login', roles: 'Caregiver, Coordinator',         color: '#2DA88A' },
           { portal: 'Family Portal',   url: '/portal/login',   roles: 'Family Member',                  color: '#C9A84C' },
         ].map(p => (
-          <div key={p.portal} className="card p-5" style={{ borderLeft: `4px solid ${p.color}` }}>
-            <p className="text-body-sm font-bold font-poppins text-neutral-800 mb-1">{p.portal}</p>
-            <p className="text-caption text-neutral-500 mb-2">{p.roles}</p>
+          <div key={p.portal} className="card p-4" style={{ borderLeft: `4px solid ${p.color}` }}>
+            <p className="text-body-sm font-bold font-poppins text-neutral-800 mb-0.5">{p.portal}</p>
+            <p className="text-caption text-neutral-500 mb-1">{p.roles}</p>
             <a href={p.url} target="_blank" rel="noopener noreferrer"
               className="text-caption font-mono text-primary-500 hover:underline">
               aethlacare.com{p.url}
@@ -152,7 +169,7 @@ export default function UsersPage() {
         ))}
       </div>
 
-      {/* Role Filter */}
+      {/* Filter */}
       <div className="card p-4 mb-5">
         <div className="flex gap-2 flex-wrap">
           {[{ v: '', l: 'All Users' }, ...roles.map(r => ({ v: r.value, l: r.label }))].map(f => (
@@ -179,15 +196,15 @@ export default function UsersPage() {
       {/* Create User Modal */}
       {showForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => { setShowForm(false); reset() }} />
-          <div className="relative bg-white rounded-3xl shadow-xl w-full max-w-md">
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={closeForm} />
+          <div className="relative bg-white rounded-3xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-100">
               <h3 className="text-heading-md font-poppins">Create New User</h3>
-              <button onClick={() => { setShowForm(false); reset() }}
-                className="p-2 rounded-xl text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100">
+              <button onClick={closeForm} className="p-2 rounded-xl text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100">
                 <X size={18} />
               </button>
             </div>
+
             <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-4">
               <div className="grid grid-cols-2 gap-3">
                 <div>
@@ -201,8 +218,8 @@ export default function UsersPage() {
               </div>
 
               <div>
-                <label className="form-label">Email Address <span className="text-red-500">*</span></label>
-                <input {...register('email', { required: true })} type="email" className="form-input" placeholder="user@aethlacare.qa" />
+                <label className="form-label">Email <span className="text-red-500">*</span></label>
+                <input {...register('email', { required: true })} type="email" className="form-input" placeholder="user@email.com" />
               </div>
 
               <div>
@@ -212,13 +229,39 @@ export default function UsersPage() {
 
               <div>
                 <label className="form-label">Role <span className="text-red-500">*</span></label>
-                <select {...register('role', { required: true })} className="form-input">
+                <select
+                  {...register('role', { required: true })}
+                  className="form-input"
+                  onChange={e => {
+                    register('role').onChange(e)
+                    setSelectedRole(e.target.value)
+                  }}
+                >
                   <option value="">Select role...</option>
                   {roles.map(r => (
                     <option key={r.value} value={r.value}>{r.label} — {r.desc}</option>
                   ))}
                 </select>
               </div>
+
+              {/* Client dropdown — only for family role */}
+              {watchRole === 'family' && (
+                <div className="p-4 rounded-2xl" style={{ background: 'rgba(201,168,76,0.08)', border: '1px solid rgba(201,168,76,0.3)' }}>
+                  <label className="form-label">Link to Client <span className="text-red-500">*</span></label>
+                  <p className="text-caption text-neutral-400 mb-2">
+                    Select the client this family member will track in the portal
+                  </p>
+                  <select {...register('clientId', { required: watchRole === 'family' })} className="form-input">
+                    <option value="">Select client...</option>
+                    {(clientsList || []).map((c: any) => (
+                      <option key={c._id} value={c._id}>
+                        {c.firstName} {c.lastName} ({c.status})
+                      </option>
+                    ))}
+                  </select>
+                  {errors.clientId && <p className="text-caption text-red-500 mt-1">Please select a client</p>}
+                </div>
+              )}
 
               <div>
                 <label className="form-label">Password <span className="text-red-500">*</span></label>
@@ -234,22 +277,21 @@ export default function UsersPage() {
                     {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
                 </div>
-                {errors.password && <p className="text-caption text-red-500 mt-1">Password must be at least 8 characters</p>}
+                {errors.password && <p className="text-caption text-red-500 mt-1">Min. 8 characters required</p>}
               </div>
 
-              {/* Portal info based on role */}
-              <div className="p-3 rounded-xl" style={{ background: 'var(--color-primary-light)' }}>
-                <p className="text-caption text-primary-700 font-medium">
-                  This user will log in at:{' '}
-                  <strong className="font-mono">aethlacare.com{getPortalUrl('')}</strong>
-                </p>
-                <p className="text-caption text-neutral-500 mt-0.5">
-                  Share the email and password with the user after creation.
-                </p>
-              </div>
+              {/* Portal info */}
+              {watchRole && (
+                <div className="p-3 rounded-xl" style={{ background: 'var(--color-primary-light)' }}>
+                  <p className="text-caption text-primary-700">
+                    This user will log in at:{' '}
+                    <strong className="font-mono">aethlacare.com{getPortal(watchRole)}</strong>
+                  </p>
+                </div>
+              )}
 
-              <button type="submit" disabled={isSubmitting} className="btn-primary btn-lg w-full">
-                {isSubmitting ? 'Creating...' : 'Create User'}
+              <button type="submit" disabled={isSubmitting || createMutation.isPending} className="btn-primary btn-lg w-full">
+                {isSubmitting || createMutation.isPending ? 'Creating...' : 'Create User'}
               </button>
             </form>
           </div>
