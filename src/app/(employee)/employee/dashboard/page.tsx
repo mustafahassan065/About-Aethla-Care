@@ -156,7 +156,7 @@ export default function EmployeeDashboard() {
             { href: '/employee/care-notes', label: 'Submit Care Note'    },
             { href: '/employee/clients',    label: 'My Clients'          },
             { href: '/employee/incidents',  label: 'Report an Incident'  },
-            { href: '/employee/profile',    label: 'My Profile'          },
+           
           ].map(a => (
             <Link key={a.href} href={a.href}
               className="flex items-center justify-center p-4 rounded-2xl border border-neutral-100 hover:border-primary-200 hover:bg-primary-50 transition-all text-center">

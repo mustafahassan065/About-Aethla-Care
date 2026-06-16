@@ -208,8 +208,7 @@ export default function CustomerDashboard() {
               { href: '/portal/care-notes', label: 'Care Notes'      },
               { href: '/portal/billing',    label: 'Invoices'        },
               { href: '/portal/caregiver',  label: 'My Caregiver'   },
-              { href: '/portal/profile',    label: 'My Profile'      },
-              { href: '/portal/messages',   label: 'Messages'        },
+              
             ].map(a => (
               <Link key={a.href} href={a.href}
                 className="flex items-center justify-center p-3 rounded-xl border border-neutral-100 hover:border-primary-200 hover:bg-primary-50 transition-all text-center">
