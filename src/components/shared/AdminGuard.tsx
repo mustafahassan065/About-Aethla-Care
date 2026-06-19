@@ -13,7 +13,7 @@ interface AdminGuardProps {
 export function AdminGuard({ children, allowedRoles, redirectTo }: AdminGuardProps) {
   const { initialize } = useAuthStore()
   const [checking, setChecking] = useState(true)
-  const [allowed, setAllowed] = useState(false)
+  const [allowed, setAllowed]   = useState(false)
   const router = useRouter()
 
   useEffect(() => {
@@ -31,13 +31,14 @@ export function AdminGuard({ children, allowedRoles, redirectTo }: AdminGuardPro
       const role = user.role
 
       if (allowedRoles && allowedRoles.length > 0) {
-        // Custom role check — e.g. employee or portal
         if (!allowedRoles.includes(role)) {
-          // Redirect to correct portal based on their role
+          // Wrong portal — redirect to correct dashboard
           if (role === 'caregiver' || role === 'coordinator') {
-            router.replace('/employee/login')
+            router.replace('/employee/dashboard')
           } else if (role === 'family') {
-            router.replace('/portal/login')
+            router.replace('/portal/dashboard')
+          } else if (role === 'admin' || role === 'accountant') {
+            router.replace('/admin/dashboard')
           } else {
             router.replace(redirectTo || '/admin/login')
           }
@@ -45,11 +46,10 @@ export function AdminGuard({ children, allowedRoles, redirectTo }: AdminGuardPro
           return
         }
       } else {
-        // Default: admin panel only
-        const adminRoles = ['admin', 'accountant']
+        // Default: admin panel — admin, coordinator, accountant
+        const adminRoles = ['admin', 'coordinator', 'accountant']
         if (!adminRoles.includes(role)) {
-          // Send to correct portal
-          if (role === 'caregiver' || role === 'coordinator') {
+          if (role === 'caregiver') {
             router.replace('/employee/dashboard')
           } else if (role === 'family') {
             router.replace('/portal/dashboard')
