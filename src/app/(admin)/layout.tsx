@@ -11,12 +11,16 @@ import { useAuthStore } from '@/lib/auth'
 const sidebarNav = [
   {
     group: 'Overview',
-    items: [{ href: '/admin/dashboard', label: 'Dashboard' }],
+    items: [
+      { href: '/admin/dashboard',  label: 'Dashboard'      },
+      { href: '/admin/activity',   label: 'Activity Log'   },
+    ],
   },
   {
     group: 'Care Management',
     items: [
       { href: '/admin/consultations', label: 'Consultations'      },
+      { href: '/admin/signups',       label: 'Signup Requests'    },
       { href: '/admin/clients',       label: 'Clients'            },
       { href: '/admin/staff',         label: 'Staff'              },
       { href: '/admin/matching',      label: 'Caregiver Matching' },
@@ -49,22 +53,21 @@ const sidebarNav = [
   },
 ]
 
-// Pages accountant can access
 const accountantAllowed = ['/admin/billing', '/admin/reports']
+const coordinatorHidden = ['/admin/settings', '/admin/users', '/admin/activity']
 
 function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const pathname  = usePathname()
+  const pathname = usePathname()
   const { logout, user } = useAuthStore()
-  const router    = useRouter()
+  const router = useRouter()
 
-  // Filter nav for accountant
   const filteredNav = sidebarNav.map(section => ({
     ...section,
-    items: section.items.filter(item =>
-      user?.role === 'accountant'
-        ? accountantAllowed.some(p => item.href.startsWith(p))
-        : true
-    ),
+    items: section.items.filter(item => {
+      if (user?.role === 'accountant') return accountantAllowed.some(p => item.href.startsWith(p))
+      if (user?.role === 'coordinator') return !coordinatorHidden.includes(item.href)
+      return true
+    }),
   })).filter(s => s.items.length > 0)
 
   return (
@@ -75,10 +78,8 @@ function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
             className="fixed inset-0 bg-black/50 z-30 lg:hidden" onClick={onClose} />
         )}
       </AnimatePresence>
-
       <aside className={`fixed top-0 left-0 h-full z-40 flex flex-col transition-transform duration-300 lg:translate-x-0 ${open ? 'translate-x-0' : '-translate-x-full'}`}
         style={{ width: '260px', background: '#0D2B3E' }}>
-
         <div className="flex items-center justify-between px-5 py-5 border-b border-white/10">
           <Link href="/admin/dashboard" className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white font-bold font-poppins"
@@ -86,7 +87,7 @@ function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
             <div>
               <span className="block text-sm font-extrabold font-poppins text-white">Aethla Care</span>
               <span className="block text-[10px] text-white/40 uppercase tracking-widest">
-                {user?.role === 'accountant' ? 'Finance Portal' : 'Admin Panel'}
+                {user?.role === 'accountant' ? 'Finance Portal' : user?.role === 'coordinator' ? 'Coordinator Panel' : 'Admin Panel'}
               </span>
             </div>
           </Link>
@@ -132,11 +133,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const pathname = usePathname()
 
-  // Login page — no guard
   if (pathname === '/admin/login') return <>{children}</>
 
   return (
-    // Admin + Coordinator + Accountant can access admin panel
     <AdminGuard allowedRoles={['admin', 'coordinator', 'accountant']} redirectTo="/admin/login">
       <div className="min-h-screen bg-neutral-50">
         <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
