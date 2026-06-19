@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useAuthStore } from '@/lib/auth'
 import apiClient from '@/lib/api'
@@ -17,12 +17,20 @@ export default function EmployeeProfile() {
     queryKey: ['my-cg', user?._id],
     queryFn: () => apiClient.get('/caregivers/me').then(r => r.data),
     enabled: !!user,
-    onSuccess: (data: any) => { if (data?.bio) setBio(data.bio) },
   })
+
+  // Set bio when data loads
+  useEffect(() => {
+    if (cg?.bio) setBio(cg.bio)
+  }, [cg])
 
   const updateMutation = useMutation({
     mutationFn: (dto: any) => apiClient.patch(`/caregivers/${cg._id}`, dto).then(r => r.data),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['my-cg'] }); toast.success('Profile updated'); setEditing(false) },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['my-cg'] })
+      toast.success('Profile updated')
+      setEditing(false)
+    },
     onError: () => toast.error('Failed to update'),
   })
 
@@ -54,13 +62,11 @@ export default function EmployeeProfile() {
       />
 
       <div className="grid lg:grid-cols-3 gap-6">
-        {/* Profile Card */}
         <div className="card p-6 text-center">
           <Avatar name={`${cgUser?.firstName || 'U'} ${cgUser?.lastName || ''}`} size="lg" />
           <h3 className="text-heading-lg font-poppins text-neutral-800 mt-4">{cgUser?.firstName} {cgUser?.lastName}</h3>
           <p className="text-body-sm text-neutral-500 mt-1">{cg.specializations?.join(', ')}</p>
           <StatusBadge status={cg.status} />
-
           <div className="grid grid-cols-2 gap-3 mt-5 pt-5 border-t border-neutral-100">
             <div>
               <p className="text-2xl font-extrabold font-poppins text-primary-500">{cg.rating?.toFixed(1) || '—'}</p>
@@ -73,20 +79,19 @@ export default function EmployeeProfile() {
           </div>
         </div>
 
-        {/* Details */}
         <div className="lg:col-span-2 space-y-5">
           <div className="card p-6">
             <h3 className="text-heading-md font-poppins mb-4">Professional Details</h3>
             <dl className="space-y-3">
               {[
-                ['Email',              cgUser?.email || '—'],
-                ['Phone',              cgUser?.phone || '—'],
-                ['License Number',     cg.licenseNumber || '—'],
-                ['License Expiry',     cg.licenseExpiry ? new Date(cg.licenseExpiry).toLocaleDateString() : '—'],
-                ['Specializations',    cg.specializations?.join(', ') || '—'],
-                ['Languages',          cg.languages?.join(', ') || '—'],
-                ['Hourly Rate',        cg.hourlyRate ? `QAR ${cg.hourlyRate}/hr` : '—'],
-                ['Background Check',   cg.backgroundCheckStatus || '—'],
+                ['Email',           cgUser?.email || '—'],
+                ['Phone',           cgUser?.phone || '—'],
+                ['License Number',  cg.licenseNumber || '—'],
+                ['License Expiry',  cg.licenseExpiry ? new Date(cg.licenseExpiry).toLocaleDateString() : '—'],
+                ['Specializations', cg.specializations?.join(', ') || '—'],
+                ['Languages',       cg.languages?.join(', ') || '—'],
+                ['Hourly Rate',     cg.hourlyRate ? `QAR ${cg.hourlyRate}/hr` : '—'],
+                ['Background Check', cg.backgroundCheckStatus || '—'],
               ].map(([k, v]) => (
                 <div key={k} className="flex justify-between py-2 border-b border-neutral-50 last:border-0">
                   <dt className="text-body-sm text-neutral-400">{k}</dt>
@@ -96,13 +101,13 @@ export default function EmployeeProfile() {
             </dl>
           </div>
 
-          {/* Bio */}
           <div className="card p-6">
             <h3 className="text-heading-md font-poppins mb-3">About Me</h3>
             {editing ? (
               <div>
                 <textarea value={bio} onChange={e => setBio(e.target.value)}
-                  className="form-input min-h-[100px] resize-y mb-3" placeholder="Tell clients and coordinators about yourself..." />
+                  className="form-input min-h-[100px] resize-y mb-3"
+                  placeholder="Tell clients and coordinators about yourself..." />
                 <button onClick={() => updateMutation.mutate({ bio })}
                   disabled={updateMutation.isPending} className="btn-primary btn-sm">
                   {updateMutation.isPending ? 'Saving...' : 'Save Bio'}
