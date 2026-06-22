@@ -1,21 +1,18 @@
+'use client'
+
+import { useState, useEffect } from 'react'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 
-export const metadata: Metadata = {
-  title: 'Premium Home Healthcare & Wellness Services in Qatar | Aethla Care',
-  description: 'Aethla Care delivers compassionate, personalized home healthcare, elderly support, disability assistance, maternity care, and wellness services across Qatar.',
-  keywords: 'home healthcare Qatar, home care Doha, elderly care Qatar, disability support Qatar, newborn care Doha, maternity care Qatar',
-}
-
 const services = [
-  { href: '/services/elderly-care',        label: 'Elderly Care'                   },
-  { href: '/services/disability-support',  label: 'Disability Support'             },
-  { href: '/services/newborn-care',        label: 'Newborn Baby Care'              },
-  { href: '/services/maternity-care',      label: 'Maternity Care'                 },
-  { href: '/services/home-wellness',       label: 'Home Wellness Services'         },
-  { href: '/services/telehealth',          label: 'Telehealth Support'             },
-  { href: '/services/patient-navigation',  label: 'Patient Navigation'             },
-  { href: '/services/lifestyle-wellness',  label: 'Lifestyle & Preventative Wellness' },
+  { href: '/services/elderly-care',       label: 'Elderly Care'                    },
+  { href: '/services/disability-support', label: 'Disability Support'              },
+  { href: '/services/newborn-care',       label: 'Newborn Baby Care'               },
+  { href: '/services/maternity-care',     label: 'Maternity Care'                  },
+  { href: '/services/home-wellness',      label: 'Home Wellness Services'          },
+  { href: '/services/telehealth',         label: 'Telehealth Support'              },
+  { href: '/services/patient-navigation', label: 'Patient Navigation'              },
+  { href: '/services/lifestyle-wellness', label: 'Lifestyle & Preventative Wellness'},
 ]
 
 const trustIndicators = [
@@ -27,39 +24,66 @@ const trustIndicators = [
 ]
 
 const processSteps = [
-  { n: 1, title: 'Initial Consultation',             desc: 'Speak with a care coordinator to discuss your needs and goals.' },
-  { n: 2, title: 'Personalized Care Assessment',     desc: 'We visit your home to assess requirements and outline a tailored care plan.' },
-  { n: 3, title: 'Caregiver Matching',               desc: 'We match you with the right caregiver based on skills, language, and compatibility.' },
-  { n: 4, title: 'Care Plan Activation',             desc: 'Your care begins — fully documented from day one through our digital platform.' },
-  { n: 5, title: 'Ongoing Monitoring & Family Updates', desc: 'Regular reviews and family updates to ensure care continues to meet your needs.' },
+  { n: 1, title: 'Initial Consultation',               desc: 'Speak with a care coordinator to discuss your needs and goals.' },
+  { n: 2, title: 'Personalized Care Assessment',       desc: 'We visit your home to assess requirements and outline a tailored care plan.' },
+  { n: 3, title: 'Caregiver Matching',                 desc: 'We match you with the right caregiver based on skills, language, and compatibility.' },
+  { n: 4, title: 'Care Plan Activation',               desc: 'Your care begins — fully documented from day one through our digital platform.' },
+  { n: 5, title: 'Ongoing Monitoring & Family Updates',desc: 'Regular reviews and family updates to ensure care continues to meet your needs.' },
 ]
 
-const faqs = [
-  {
-    q: 'What home healthcare services does Aethla Care provide in Qatar?',
-    a: 'Aethla Care provides elderly care, disability support, maternity care, newborn care, telehealth coordination, and preventative wellness services across Qatar.',
-  },
-  {
-    q: 'Do you provide live-in caregivers in Doha?',
-    a: 'Yes, Aethla Care offers both live-in and scheduled caregiver support services.',
-  },
-  {
-    q: 'Is your care team multilingual?',
-    a: 'Yes, our caregivers and coordinators support multiple languages for Qatar\'s diverse community.',
-  },
-  {
-    q: 'How quickly can care begin after contacting Aethla Care?',
-    a: 'Most families can begin receiving care within 24 to 48 hours of their initial assessment. Urgent cases can be arranged sooner.',
-  },
-  {
-    q: 'Are your caregivers licensed and background checked?',
-    a: 'Yes. Every caregiver is verified by the Qatar Ministry of Health, has passed a full background check, and receives ongoing training.',
-  },
-  {
-    q: 'What is the family portal?',
-    a: 'The family portal gives family members secure online access to view schedules, read care notes, check billing, and communicate with the care team.',
-  },
+const staticFaqs = [
+  { q: 'What home healthcare services does Aethla Care provide in Qatar?', a: 'Aethla Care provides elderly care, disability support, maternity care, newborn care, telehealth coordination, and preventative wellness services across Qatar.' },
+  { q: 'Do you provide live-in caregivers in Doha?',                       a: 'Yes, Aethla Care offers both live-in and scheduled caregiver support services.' },
+  { q: 'Is your care team multilingual?',                                  a: "Yes, our caregivers and coordinators support multiple languages for Qatar's diverse community." },
+  { q: 'How quickly can care begin after contacting Aethla Care?',         a: 'Most families can begin receiving care within 24 to 48 hours of their initial assessment. Urgent cases can be arranged sooner.' },
+  { q: 'Are your caregivers licensed and background checked?',             a: 'Yes. Every caregiver is verified by the Qatar Ministry of Health, has passed a full background check, and receives ongoing training.' },
+  { q: 'What is the family portal?',                                       a: 'The family portal gives family members secure online access to view schedules, read care notes, check billing, and communicate with the care team.' },
 ]
+
+function FAQSection() {
+  const [faqs, setFaqs] = useState(staticFaqs)
+  const [open, setOpen]  = useState<number | null>(null)
+
+  useEffect(() => {
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/faq/public`)
+      .then(r => r.json())
+      .then(data => {
+        if (Array.isArray(data) && data.length > 0) {
+          setFaqs(data.map((f: any) => ({ q: f.question, a: f.answer })))
+        }
+      })
+      .catch(() => {})
+  }, [])
+
+  return (
+    <section className="section-pad" style={{ background: 'var(--color-bg-soft)' }} id="faq">
+      <div className="container-max max-w-4xl">
+        <div className="section-header">
+          <div className="section-label justify-center mb-3">FAQ</div>
+          <h2 className="text-display-sm mb-4">Frequently Asked Questions</h2>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {faqs.map((f, i) => (
+            <div key={i} className="card group">
+              <button
+                onClick={() => setOpen(open === i ? null : i)}
+                className="flex justify-between items-center w-full p-5 cursor-pointer font-semibold text-neutral-800 hover:text-primary-500 transition-colors text-left"
+              >
+                <span>{f.q}</span>
+                <span className={`ml-4 flex-shrink-0 text-2xl text-primary-400 transition-transform ${open === i ? 'rotate-45' : ''}`}>+</span>
+              </button>
+              {open === i && (
+                <div className="px-5 pb-5 text-body-sm text-neutral-500 leading-relaxed border-t border-neutral-100 pt-4">
+                  {f.a}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
 
 export default function HomePage() {
   return (
@@ -165,10 +189,10 @@ export default function HomePage() {
               </p>
               <div className="flex flex-col gap-3">
                 {[
-                  { title: 'Licensed Care Professionals',      desc: 'Every caregiver is Ministry of Health verified and background checked.' },
-                  { title: 'AI-Powered Caregiver Matching',    desc: 'We match caregivers by language, skills, availability, and cultural fit.' },
-                  { title: 'Secure Family Portal',            desc: 'Real-time access to schedules, care notes, and billing from any device.' },
-                  { title: 'Multilingual Care Teams',         desc: 'Support in Arabic, English, Tagalog, Hindi, Urdu, and more.' },
+                  { title: 'Licensed Care Professionals',   desc: 'Every caregiver is Ministry of Health verified and background checked.'        },
+                  { title: 'AI-Powered Caregiver Matching', desc: 'We match caregivers by language, skills, availability, and cultural fit.'      },
+                  { title: 'Secure Family Portal',          desc: 'Real-time access to schedules, care notes, and billing from any device.'       },
+                  { title: 'Multilingual Care Teams',       desc: 'Support in Arabic, English, Tagalog, Hindi, Urdu, and more.'                   },
                 ].map((f) => (
                   <div key={f.title} className="card p-4 flex gap-4 items-start">
                     <div className="w-2 h-2 rounded-full bg-accent-400 flex-shrink-0 mt-2" />
@@ -216,21 +240,9 @@ export default function HomePage() {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {[
-              {
-                text: 'Aethla Care provided exceptional support for my mother after surgery. The caregivers were compassionate, professional, and reliable.',
-                name: 'Fatima Al-Mansouri',
-                location: 'Doha',
-              },
-              {
-                text: 'Our baby nurse was outstanding with our newborn. She guided us through every step and gave us real confidence as first-time parents.',
-                name: 'Khalid Al-Rashid',
-                location: 'Lusail',
-              },
-              {
-                text: 'The family portal gives me peace of mind while I am abroad. I can see every visit, every care note, and every update in real time.',
-                name: 'Sara Al-Qahtani',
-                location: 'Al Rayyan',
-              },
+              { text: 'Aethla Care provided exceptional support for my mother after surgery. The caregivers were compassionate, professional, and reliable.', name: 'Fatima Al-Mansouri', location: 'Doha'      },
+              { text: 'Our baby nurse was outstanding with our newborn. She guided us through every step and gave us real confidence as first-time parents.', name: 'Khalid Al-Rashid',   location: 'Lusail'    },
+              { text: 'The family portal gives me peace of mind while I am abroad. I can see every visit, every care note, and every update in real time.',   name: 'Sara Al-Qahtani',   location: 'Al Rayyan' },
             ].map((t) => (
               <div key={t.name} className="card card-hover p-7">
                 <p className="text-body-sm text-neutral-600 italic leading-relaxed mb-6">&ldquo;{t.text}&rdquo;</p>
@@ -258,26 +270,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* FAQ */}
-      <section className="section-pad" style={{ background: 'var(--color-bg-soft)' }} id="faq">
-        <div className="container-max max-w-4xl">
-          <div className="section-header">
-            <div className="section-label justify-center mb-3">FAQ</div>
-            <h2 className="text-display-sm mb-4">Frequently Asked Questions</h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {faqs.map((f) => (
-              <details key={f.q} className="card group">
-                <summary className="flex justify-between items-center p-5 cursor-pointer font-semibold text-neutral-800 hover:text-primary-500 transition-colors list-none">
-                  {f.q}
-                  <span className="ml-4 flex-shrink-0 text-2xl text-primary-400 group-open:rotate-45 transition-transform">+</span>
-                </summary>
-                <div className="px-5 pb-5 text-body-sm text-neutral-500 leading-relaxed border-t border-neutral-100 pt-4">{f.a}</div>
-              </details>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* FAQ — Dynamic from CMS, fallback to static */}
+      <FAQSection />
     </>
   )
 }

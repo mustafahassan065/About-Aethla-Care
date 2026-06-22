@@ -9,23 +9,16 @@ import { DataTable, Column } from '@/components/ui/DataTable'
 import { X, RotateCcw } from 'lucide-react'
 
 type SignupType = 'employee' | 'patient'
-
-// Action history for undo
-type ActionRecord = {
-  id: string
-  type: SignupType
-  action: 'approved' | 'rejected'
-  prevStatus: string
-}
+type LastAction = { id: string; type: SignupType; action: string }
 
 export default function SignupRequestsPage() {
   const qc = useQueryClient()
-  const [activeTab, setActiveTab] = useState<SignupType>('employee')
-  const [status, setStatus] = useState('')
-  const [page, setPage] = useState(1)
-  const [selected, setSelected] = useState<any>(null)
-  const [clientId, setClientId] = useState('')
-  const [lastAction, setLastAction] = useState<ActionRecord | null>(null)
+  const [activeTab, setActiveTab]   = useState<SignupType>('employee')
+  const [status, setStatus]         = useState('')
+  const [page, setPage]             = useState(1)
+  const [selected, setSelected]     = useState<any>(null)
+  const [clientId, setClientId]     = useState('')
+  const [lastAction, setLastAction] = useState<LastAction | null>(null)
 
   const { data, isLoading } = useQuery({
     queryKey: ['signups', activeTab, status, page],
@@ -41,29 +34,21 @@ export default function SignupRequestsPage() {
     enabled: !!selected && activeTab === 'patient',
   })
 
-  // Approve
   const approveMutation = useMutation({
     mutationFn: ({ id, clientId }: { id: string; clientId?: string }) =>
       apiClient.post(
-        activeTab === 'patient'
-          ? `/public/patient-signups/${id}/approve`
-          : `/public/employee-signups/${id}/approve`,
+        activeTab === 'patient' ? `/public/patient-signups/${id}/approve` : `/public/employee-signups/${id}/approve`,
         activeTab === 'patient' ? { clientId } : {}
       ).then(r => r.data),
     onSuccess: (_, vars) => {
       qc.invalidateQueries({ queryKey: ['signups'] })
-      setLastAction({ id: vars.id, type: activeTab, action: 'approved', prevStatus: 'pending' })
-      toast.success('Approved — account created', {
-        duration: 6000,
-        icon: '✅',
-      })
-      setSelected(null)
-      setClientId('')
+      setLastAction({ id: vars.id, type: activeTab, action: 'approved' })
+      toast.success('Approved — account created', { duration: 6000 })
+      setSelected(null); setClientId('')
     },
     onError: (e: any) => toast.error(e?.response?.data?.message || 'Failed to approve'),
   })
 
-  // Reject
   const rejectMutation = useMutation({
     mutationFn: (id: string) =>
       apiClient.patch(
@@ -72,14 +57,13 @@ export default function SignupRequestsPage() {
       ).then(r => r.data),
     onSuccess: (_, id) => {
       qc.invalidateQueries({ queryKey: ['signups'] })
-      setLastAction({ id, type: activeTab, action: 'rejected', prevStatus: 'pending' })
+      setLastAction({ id, type: activeTab, action: 'rejected' })
       toast.success('Request rejected', { duration: 6000 })
       setSelected(null)
     },
     onError: () => toast.error('Failed to reject'),
   })
 
-  // Delete
   const deleteMutation = useMutation({
     mutationFn: (id: string) =>
       apiClient.delete(
@@ -87,14 +71,12 @@ export default function SignupRequestsPage() {
       ).then(r => r.data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['signups'] })
-      toast.success('Request deleted')
-      setSelected(null)
-      setLastAction(null)
+      toast.success('Deleted permanently')
+      setSelected(null); setLastAction(null)
     },
     onError: () => toast.error('Failed to delete'),
   })
 
-  // Undo — revert to pending
   const undoMutation = useMutation({
     mutationFn: ({ id, type }: { id: string; type: SignupType }) =>
       apiClient.patch(
@@ -103,11 +85,22 @@ export default function SignupRequestsPage() {
       ).then(r => r.data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['signups'] })
-      toast.success('Action undone — status reverted to pending')
+      toast.success('Action undone — reverted to pending')
       setLastAction(null)
     },
     onError: () => toast.error('Failed to undo'),
   })
+
+  // Portal badge — shows which portal the person signed up from
+  const PortalBadge = ({ type }: { type: SignupType }) => (
+    <span className={`px-2 py-1 rounded-full text-caption font-semibold ${
+      type === 'employee'
+        ? 'bg-blue-50 text-blue-600'
+        : 'bg-amber-50 text-amber-600'
+    }`}>
+      {type === 'employee' ? 'Employee Portal' : 'Patient Portal'}
+    </span>
+  )
 
   const employeeColumns: Column<any>[] = [
     {
@@ -120,17 +113,21 @@ export default function SignupRequestsPage() {
         </div>
       )
     },
+    {
+      key: '_portal', header: 'Requested Access To',
+      render: () => <PortalBadge type="employee" />
+    },
     { key: 'specialization', header: 'Specialization', render: (v) => <span className="text-body-sm text-neutral-700">{String(v || '—')}</span> },
-    { key: 'licenseNumber', header: 'License', render: (v) => <span className="font-mono text-xs text-neutral-600">{String(v || '—')}</span> },
-    { key: 'experience', header: 'Experience', render: (v) => <span className="text-caption text-neutral-500">{String(v || '—')}</span> },
-    { key: 'status', header: 'Status', render: (v) => <StatusBadge status={String(v)} /> },
-    { key: 'createdAt', header: 'Applied', render: (v) => <span className="text-caption text-neutral-400">{new Date(String(v)).toLocaleDateString()}</span> },
+    { key: 'licenseNumber',  header: 'License',        render: (v) => <span className="font-mono text-xs text-neutral-600">{String(v || '—')}</span> },
+    { key: 'experience',     header: 'Experience',     render: (v) => <span className="text-caption text-neutral-500">{String(v || '—')}</span> },
+    { key: 'status',         header: 'Status',         render: (v) => <StatusBadge status={String(v)} /> },
+    { key: 'createdAt',      header: 'Applied',        render: (v) => <span className="text-caption text-neutral-400">{new Date(String(v)).toLocaleDateString()}</span> },
     {
       key: '_id', header: 'Actions',
       render: (_, r) => (
         <div className="flex gap-2">
           <button onClick={() => setSelected(r)} className="btn-outline btn-sm py-1 px-3 text-xs">Review</button>
-          <button onClick={() => { if (confirm('Delete this request?')) deleteMutation.mutate(r._id) }}
+          <button onClick={() => { if (confirm('Delete permanently?')) deleteMutation.mutate(r._id) }}
             className="text-red-400 hover:text-red-600 text-caption font-semibold px-2 py-1">Delete</button>
         </div>
       )
@@ -148,21 +145,25 @@ export default function SignupRequestsPage() {
         </div>
       )
     },
+    {
+      key: '_portal', header: 'Requested Access To',
+      render: () => <PortalBadge type="patient" />
+    },
     { key: 'accountType', header: 'Account Type', render: (v) => <span className="badge-primary capitalize text-xs">{String(v)}</span> },
     {
       key: 'isSelf', header: 'For Patient',
       render: (_, r) => r.isSelf
         ? <span className="text-body-sm text-neutral-600">Themselves</span>
-        : <span className="text-body-sm text-neutral-600">{r.patientFirstName} {r.patientLastName}<br/><span className="text-caption text-neutral-400">({r.relationship})</span></span>
+        : <div><span className="text-body-sm text-neutral-600">{r.patientFirstName} {r.patientLastName}</span><p className="text-caption text-neutral-400">({r.relationship})</p></div>
     },
-    { key: 'status', header: 'Status', render: (v) => <StatusBadge status={String(v)} /> },
+    { key: 'status',    header: 'Status',  render: (v) => <StatusBadge status={String(v)} /> },
     { key: 'createdAt', header: 'Applied', render: (v) => <span className="text-caption text-neutral-400">{new Date(String(v)).toLocaleDateString()}</span> },
     {
       key: '_id', header: 'Actions',
       render: (_, r) => (
         <div className="flex gap-2">
           <button onClick={() => setSelected(r)} className="btn-outline btn-sm py-1 px-3 text-xs">Review</button>
-          <button onClick={() => { if (confirm('Delete this request?')) deleteMutation.mutate(r._id) }}
+          <button onClick={() => { if (confirm('Delete permanently?')) deleteMutation.mutate(r._id) }}
             className="text-red-400 hover:text-red-600 text-caption font-semibold px-2 py-1">Delete</button>
         </div>
       )
@@ -188,22 +189,23 @@ export default function SignupRequestsPage() {
             disabled={undoMutation.isPending}
             className="flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-100 text-amber-700 font-semibold text-body-sm hover:bg-amber-200 transition-all"
           >
-            <RotateCcw size={15} />
-            Undo Action
+            <RotateCcw size={15} /> Undo Action
           </button>
         </div>
       )}
 
-      {/* Tabs */}
+      {/* Tabs — Employee Portal vs Patient Portal */}
       <div className="flex gap-1 mb-5 border-b border-neutral-200">
         {([
-          { k: 'employee', l: 'Employee Applications' },
-          { k: 'patient',  l: 'Patient Requests'      },
+          { k: 'employee', l: 'Employee Portal Requests', color: 'bg-blue-50 text-blue-600'   },
+          { k: 'patient',  l: 'Patient Portal Requests',  color: 'bg-amber-50 text-amber-600' },
         ] as const).map(t => (
           <button key={t.k} onClick={() => { setActiveTab(t.k); setPage(1); setStatus('') }}
             className={`px-4 py-2.5 text-body-sm font-semibold rounded-t-xl transition-all -mb-px border-b-2 ${
               activeTab === t.k ? 'text-primary-500 border-primary-500 bg-primary-50' : 'text-neutral-500 border-transparent hover:text-neutral-700'
-            }`}>{t.l}</button>
+            }`}>
+            {t.l}
+          </button>
         ))}
       </div>
 
@@ -228,7 +230,7 @@ export default function SignupRequestsPage() {
         limit={20}
         onPageChange={setPage}
         rowKey={r => r._id}
-        emptyMessage="No signup requests."
+        emptyMessage={`No ${activeTab === 'employee' ? 'employee' : 'patient'} portal signup requests.`}
       />
 
       {/* Review Modal */}
@@ -237,12 +239,11 @@ export default function SignupRequestsPage() {
           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setSelected(null)} />
           <div className="relative bg-white rounded-3xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-100">
-              <h3 className="text-heading-md font-poppins">
-                Review {activeTab === 'employee' ? 'Employee' : 'Patient'} Application
-              </h3>
-              <button onClick={() => setSelected(null)} className="p-2 rounded-xl text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100">
-                <X size={18} />
-              </button>
+              <div>
+                <h3 className="text-heading-md font-poppins">Review Application</h3>
+                <PortalBadge type={activeTab} />
+              </div>
+              <button onClick={() => setSelected(null)} className="p-2 rounded-xl text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100"><X size={18} /></button>
             </div>
 
             <div className="p-6 space-y-4">
@@ -251,20 +252,22 @@ export default function SignupRequestsPage() {
                   ['Name',           `${selected.firstName} ${selected.lastName}`],
                   ['Email',          selected.email],
                   ['Phone',          selected.phone || '—'],
+                  ['Portal',         'Employee Portal'],
                   ['Specialization', selected.specialization || '—'],
                   ['License No.',    selected.licenseNumber || '—'],
                   ['Experience',     selected.experience || '—'],
                   ['Applied',        new Date(selected.createdAt).toLocaleString()],
-                  ['Current Status', selected.status],
+                  ['Status',         selected.status],
                 ] : [
                   ['Name',         `${selected.firstName} ${selected.lastName}`],
                   ['Email',        selected.email],
                   ['Phone',        selected.phone || '—'],
+                  ['Portal',       'Patient Portal'],
                   ['Account Type', selected.accountType],
                   ['For Patient',  selected.isSelf ? 'Themselves' : `${selected.patientFirstName} ${selected.patientLastName}`],
                   ['Relationship', selected.isSelf ? 'Self' : selected.relationship],
                   ['Applied',      new Date(selected.createdAt).toLocaleString()],
-                  ['Current Status', selected.status],
+                  ['Status',       selected.status],
                 ]).map(([k, v]) => (
                   <div key={k} className="flex justify-between py-2 border-b border-neutral-50 last:border-0">
                     <dt className="text-body-sm text-neutral-400">{k}</dt>
@@ -277,9 +280,7 @@ export default function SignupRequestsPage() {
               {activeTab === 'patient' && selected.status === 'pending' && (
                 <div>
                   <label className="form-label">Link to Client Record (Optional)</label>
-                  <p className="text-caption text-neutral-400 mb-2">
-                    Select the client this user will track in the family portal
-                  </p>
+                  <p className="text-caption text-neutral-400 mb-2">Select the client this user will track in the family portal</p>
                   <select value={clientId} onChange={e => setClientId(e.target.value)} className="form-input">
                     <option value="">No client link — can link later</option>
                     {(clientsList?.data || []).map((c: any) => (
@@ -289,7 +290,7 @@ export default function SignupRequestsPage() {
                 </div>
               )}
 
-              {/* Actions */}
+              {/* Approve / Reject */}
               {selected.status === 'pending' && (
                 <div className="flex gap-3 pt-2">
                   <button
@@ -302,13 +303,14 @@ export default function SignupRequestsPage() {
                   <button
                     onClick={() => rejectMutation.mutate(selected._id)}
                     disabled={rejectMutation.isPending}
-                    className="px-5 py-3 rounded-xl border border-red-200 text-red-500 font-semibold hover:bg-red-50 transition-all flex-shrink-0"
+                    className="px-5 py-3 rounded-xl border border-red-200 text-red-500 font-semibold hover:bg-red-50 transition-all"
                   >
                     Reject
                   </button>
                 </div>
               )}
 
+              {/* Undo from modal */}
               {selected.status !== 'pending' && (
                 <div className="space-y-3">
                   <div className="p-4 rounded-xl" style={{
@@ -318,7 +320,6 @@ export default function SignupRequestsPage() {
                       color: selected.status === 'approved' ? '#2DA88A' : '#EF4444'
                     }}>Status: {selected.status}</p>
                   </div>
-                  {/* Undo from modal */}
                   <button
                     onClick={() => { undoMutation.mutate({ id: selected._id, type: activeTab }); setSelected(null) }}
                     className="flex items-center gap-2 w-full justify-center py-2.5 rounded-xl border border-amber-200 text-amber-600 font-semibold hover:bg-amber-50 transition-all"
