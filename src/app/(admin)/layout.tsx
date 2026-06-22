@@ -41,12 +41,14 @@ const sidebarNav = [
     group: 'Content',
     items: [
       { href: '/admin/cms',     label: 'CMS / Blog'          },
+      { href: '/admin/qa', label: 'Q&A Management' },
       { href: '/admin/careers', label: 'Career Applications' },
     ],
   },
   {
     group: 'System',
     items: [
+      { href: '/admin/view-as', label: 'View As User' },
       { href: '/admin/users',    label: 'Users & Access' },
       { href: '/admin/settings', label: 'Settings'       },
     ],

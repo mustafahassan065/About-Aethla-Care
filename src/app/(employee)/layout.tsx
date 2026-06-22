@@ -9,13 +9,14 @@ import { useAuthStore } from '@/lib/auth'
 import { AdminGuard } from '@/components/shared/AdminGuard'
 
 const navItems = [
-  { href: '/employee/dashboard',  label: 'My Dashboard'    },
-  { href: '/employee/schedule',   label: 'My Schedule'     },
-  { href: '/employee/clients',    label: 'My Clients'      },
-  { href: '/employee/care-notes', label: 'Care Notes'      },
-  { href: '/employee/checkin',    label: 'Check In / Out'  },
-  { href: '/employee/incidents',  label: 'Report Incident' },
-  { href: '/employee/profile',    label: 'My Profile'      },
+  { href: '/employee/dashboard',      label: 'My Dashboard'    },
+  { href: '/employee/schedule',       label: 'My Schedule'     },
+  { href: '/employee/shift-history',  label: 'Shift History'   },
+  { href: '/employee/clients',        label: 'My Clients'      },
+  { href: '/employee/care-notes',     label: 'Care Notes'      },
+  { href: '/employee/checkin',        label: 'Check In / Out'  },
+  { href: '/employee/incidents',      label: 'Report Incident' },
+  { href: '/employee/profile',        label: 'My Profile'      },
 ]
 
 function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
@@ -73,7 +74,6 @@ function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
   )
 }
 
-// This wrapper only applies guard to non-login pages
 function EmployeeContent({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   return (
@@ -100,13 +100,7 @@ function EmployeeContent({ children }: { children: React.ReactNode }) {
 
 export default function EmployeeLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
-
-  // Login page — no guard, no sidebar
-  if (pathname === '/employee/login') {
-    return <>{children}</>
-  }
-
-  // All other pages — require caregiver/coordinator role
+  if (pathname === '/employee/login') return <>{children}</>
   return (
     <AdminGuard allowedRoles={['caregiver', 'coordinator']} redirectTo="/employee/login">
       <EmployeeContent>{children}</EmployeeContent>

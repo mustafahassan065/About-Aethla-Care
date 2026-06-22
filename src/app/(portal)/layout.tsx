@@ -9,13 +9,16 @@ import { useAuthStore } from '@/lib/auth'
 import { AdminGuard } from '@/components/shared/AdminGuard'
 
 const navItems = [
-  { href: '/portal/dashboard',  label: 'Overview'       },
-  { href: '/portal/schedule',   label: 'Visit Schedule' },
-  { href: '/portal/care-notes', label: 'Care Notes'     },
-  { href: '/portal/billing',    label: 'Billing'        },
+  { href: '/portal/dashboard',  label: 'Overview'        },
+  { href: '/portal/care-plan',  label: 'My Care Plan'    },
+  { href: '/portal/schedule',   label: 'Visit Schedule'  },
+  { href: '/portal/care-notes', label: 'Care Notes'      },
+  { href: '/portal/medical',    label: 'Medical Records' },
+  { href: '/portal/consent',    label: 'Consent Forms'   },
+  { href: '/portal/history',    label: 'Service History' },
+  { href: '/portal/billing',    label: 'Billing'         },
   { href: '/portal/caregiver',  label: 'My Caregiver'   },
-  { href: '/portal/messages',   label: 'Messages'       },
-  { href: '/portal/profile',    label: 'My Profile'     },
+  { href: '/portal/profile',    label: 'My Profile'      },
 ]
 
 function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
@@ -57,8 +60,7 @@ function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
         </div>
         <div className="p-3 border-t border-white/10">
           <div className="flex items-center gap-3 p-3 rounded-xl" style={{ background: 'rgba(255,255,255,0.06)' }}>
-            <div className="w-9 h-9 rounded-full flex items-center justify-center text-white font-bold text-sm"
-              style={{ background: '#2DA88A' }}>
+            <div className="w-9 h-9 rounded-full flex items-center justify-center text-white font-bold text-sm" style={{ background: '#2DA88A' }}>
               {user?.firstName?.[0]}{user?.lastName?.[0]}
             </div>
             <div className="flex-1 min-w-0">
@@ -100,13 +102,7 @@ function PortalContent({ children }: { children: React.ReactNode }) {
 
 export default function CustomerLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
-
-  // Login page — no guard, no sidebar
-  if (pathname === '/portal/login') {
-    return <>{children}</>
-  }
-
-  // All other pages — require family role
+  if (pathname === '/portal/login') return <>{children}</>
   return (
     <AdminGuard allowedRoles={['family']} redirectTo="/portal/login">
       <PortalContent>{children}</PortalContent>
