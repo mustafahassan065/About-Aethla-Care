@@ -24,19 +24,17 @@ export default function ElderlyCare() {
         </div>
       </section>
 
-      {/* Image 1 */}
-      <section className="w-full">
-        <img
-          src="/images/Elderly Care/Medication Reminders.png"
-          alt="Elderly Care Qatar"
-          className="w-full h-72 md:h-96 object-cover"
-        />
-      </section>
-
-      {/* About */}
+      {/* Image 1 — Left image, right text */}
       <section className="section-pad bg-white">
         <div className="container-max">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
+            <div className="h-[420px] rounded-3xl overflow-hidden shadow-lg">
+              <img
+                src="/images/Elderly Care/Medication Reminders.png"
+                alt="Elderly Care Qatar"
+                className="w-full h-full object-cover"
+              />
+            </div>
             <div>
               <div className="section-label mb-3">About This Service</div>
               <h2 className="text-display-sm mb-5">Professional Elderly Home Care</h2>
@@ -68,67 +66,82 @@ export default function ElderlyCare() {
                 ))}
               </ul>
             </div>
-            <div className="flex flex-col gap-5">
-              {[
-                { title: 'Licensed Care Professionals',   desc: 'All caregivers are Ministry of Health verified and background checked.' },
-                { title: 'Personalised Care Plans',       desc: 'Every arrangement is tailored to the individual — no generic packages.' },
-                { title: 'Multilingual Team',             desc: 'We match caregivers by language for a comfortable experience.' },
-                { title: '24/7 Coordinator Support',      desc: 'Our coordinators are available around the clock for any questions.' },
-              ].map(f => (
-                <div key={f.title} className="card p-4 flex gap-4 items-start">
-                  <div className="w-2 h-2 rounded-full bg-accent-400 flex-shrink-0 mt-2" />
-                  <div>
-                    <h4 className="text-body-sm font-bold font-poppins text-neutral-800 mb-0.5">{f.title}</h4>
-                    <p className="text-body-sm text-neutral-500">{f.desc}</p>
+          </div>
+        </div>
+      </section>
+
+      {/* Image 2 — Right image, left text */}
+      <section className="section-pad" style={{ background: 'var(--color-bg-soft)' }}>
+        <div className="container-max">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            <div>
+              <div className="section-label mb-3">Who We Help</div>
+              <h2 className="text-display-sm mb-5">Who This Service Is For</h2>
+              <div className="flex flex-col gap-4">
+                {[
+                  { title: 'Elderly Living Alone',         desc: 'Regular visits for elderly individuals who need support and companionship.' },
+                  { title: 'Post-Hospital Recovery',       desc: 'Transitional care following hospital discharge for safe recovery at home.' },
+                  { title: 'Chronic Condition Management', desc: 'Ongoing daily support for managing long-term conditions such as diabetes or dementia.' },
+                  { title: 'Mobility Challenges',          desc: 'Support for individuals with limited mobility — movement, transfers, and fall prevention.' },
+                  { title: 'Family Respite',               desc: 'Relief for family members who are primary caregivers, allowing them time to rest.' },
+                  { title: 'Dementia & Memory Care',       desc: 'Specialist support for clients living with dementia — maintaining routine and safety.' },
+                ].map(f => (
+                  <div key={f.title} className="card p-4 flex gap-4 items-start">
+                    <div className="w-2 h-2 rounded-full bg-accent-400 flex-shrink-0 mt-2" />
+                    <div>
+                      <h4 className="text-body-sm font-bold font-poppins text-neutral-800 mb-0.5">{f.title}</h4>
+                      <p className="text-body-sm text-neutral-500">{f.desc}</p>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
+            </div>
+            <div className="h-[520px] rounded-3xl overflow-hidden shadow-lg">
+              <img
+                src="/images/Elderly Care/Mobility Assistance.png"
+                alt="Elderly care caregiver"
+                className="w-full h-full object-cover"
+              />
             </div>
           </div>
         </div>
       </section>
 
-      {/* Image 2 */}
-      <section className="w-full">
-        <img
-          src="/images/Elderly Care/Mobility Assistance.png"
-          alt="Elderly care caregiver"
-          className="w-full h-72 md:h-96 object-cover"
-        />
-      </section>
-
-      {/* Who Is This For */}
-      <section className="section-pad" style={{ background: 'var(--color-bg-soft)' }}>
+      {/* Image 3 — Left image, right text */}
+      <section className="section-pad bg-white">
         <div className="container-max">
-          <div className="section-header">
-            <div className="section-label justify-center mb-3">Who We Help</div>
-            <h2 className="text-display-sm mb-4">Who This Service Is For</h2>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mt-10">
-            {[
-              { title: 'Elderly Living Alone',         desc: 'Regular visits for elderly individuals who need support and companionship.' },
-              { title: 'Post-Hospital Recovery',       desc: 'Transitional care following hospital discharge for safe recovery at home.' },
-              { title: 'Chronic Condition Management', desc: 'Ongoing daily support for managing long-term conditions such as diabetes or dementia.' },
-              { title: 'Mobility Challenges',          desc: 'Support for individuals with limited mobility — movement, transfers, and fall prevention.' },
-              { title: 'Family Respite',               desc: 'Relief for family members who are primary caregivers, allowing them time to rest.' },
-              { title: 'Dementia & Memory Care',       desc: 'Specialist support for clients living with dementia — maintaining routine and safety.' },
-            ].map(f => (
-              <div key={f.title} className="card p-6">
-                <h3 className="text-heading-sm font-poppins text-primary-500 mb-2">{f.title}</h3>
-                <p className="text-body-sm text-neutral-500 leading-relaxed">{f.desc}</p>
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            <div className="h-[420px] rounded-3xl overflow-hidden shadow-lg">
+              <img
+                src="/images/Elderly Care/Overnight Care.png"
+                alt="Overnight elderly care"
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <div>
+              <div className="section-label mb-3">Why Aethla Care</div>
+              <h2 className="text-display-sm mb-5">Why Choose Aethla Care</h2>
+              <div className="flex flex-col gap-4">
+                {[
+                  { title: 'Licensed Care Professionals',  desc: 'All caregivers are Ministry of Health verified and background checked.' },
+                  { title: 'Personalised Care Plans',      desc: 'Every arrangement is tailored to the individual — no generic packages.' },
+                  { title: 'Multilingual Team',            desc: 'We match caregivers by language for a comfortable experience.' },
+                  { title: 'Family Portal Access',         desc: 'Family members can monitor visits, care notes, and billing online.' },
+                  { title: 'Flexible Scheduling',          desc: 'Daily visits, live-in care, overnight support, or part-time arrangements.' },
+                  { title: '24/7 Coordinator Support',     desc: 'Our coordinators are available around the clock for any questions.' },
+                ].map(f => (
+                  <div key={f.title} className="card p-4 flex gap-4 items-start">
+                    <div className="w-2 h-2 rounded-full bg-accent-400 flex-shrink-0 mt-2" />
+                    <div>
+                      <h4 className="text-body-sm font-bold font-poppins text-neutral-800 mb-0.5">{f.title}</h4>
+                      <p className="text-body-sm text-neutral-500">{f.desc}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
           </div>
         </div>
-      </section>
-
-      {/* Image 3 */}
-      <section className="w-full">
-        <img
-          src="/images/Elderly Care/Overnight Care.png"
-          alt="Home care environment"
-          className="w-full h-72 md:h-96 object-cover"
-        />
       </section>
 
       {/* CTA */}

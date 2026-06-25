@@ -8,6 +8,7 @@ export const metadata: Metadata = {
 
 export default function ServicePage() {
   const features = ['Chronic disease monitoring', 'Health coaching at home', 'Nutrition and diet guidance', 'Exercise and mobility support', 'Stress management techniques', 'Preventative health screenings', 'Vital signs monitoring', 'Family portal with health updates']
+  const whoItems = [{'title': 'Chronic Disease Patients', 'desc': 'Ongoing monitoring and coaching for conditions such as diabetes, hypertension, and heart disease.'}, {'title': 'Weight Management', 'desc': 'Personalised nutrition planning and exercise support delivered at home.'}, {'title': 'Smoking Cessation', 'desc': 'Structured programs to support clients in quitting smoking at home.'}, {'title': 'Mental Wellbeing', 'desc': 'Stress management and emotional wellness coaching.'}, {'title': 'Preventative Screening', 'desc': 'Regular health assessments to detect and prevent common conditions early.'}, {'title': 'Active Ageing', 'desc': 'Wellness programs for older adults to stay active and independent.'}]
 
   return (
     <>
@@ -21,24 +22,22 @@ export default function ServicePage() {
           </div>
           <h1 className="text-display-lg text-white mb-4">Home Wellness Services in Qatar</h1>
           <p className="text-body-lg text-white/75 max-w-2xl mx-auto">
-            Professional home wellness services services delivered at home across Qatar — compassionate, qualified care tailored to each family.
+            Professional home wellness services delivered at home across Qatar — compassionate, qualified care tailored to each family.
           </p>
         </div>
       </section>
 
-      {/* Image 1 */}
-      <section className="w-full">
-        <img
-          src="/images/Home Wellness/Diabetes Screening.png"
-          alt="Home Wellness Services Qatar"
-          className="w-full h-72 md:h-96 object-cover"
-        />
-      </section>
-
-      {/* About */}
+      {/* Image 1 — Left image, right text */}
       <section className="section-pad bg-white">
         <div className="container-max">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
+            <div className="h-[420px] rounded-3xl overflow-hidden shadow-lg">
+              <img
+                src="/images/Home Wellness/Diabetes Screening.png"
+                alt="Home Wellness Services Qatar"
+                className="w-full h-full object-cover"
+              />
+            </div>
             <div>
               <div className="section-label mb-3">About This Service</div>
               <h2 className="text-display-sm mb-5">Professional Home Wellness Services</h2>
@@ -62,67 +61,75 @@ export default function ServicePage() {
                 ))}
               </ul>
             </div>
-            <div className="flex flex-col gap-5">
-              {[
-                { title: 'Licensed Professionals',    desc: 'All caregivers are Ministry of Health verified and background checked.' },
-                { title: 'Personalised Care Plans',   desc: 'Every arrangement is tailored to the individual — no generic packages.' },
-                { title: 'Multilingual Team',         desc: 'We match caregivers by language and cultural background.' },
-                { title: '24/7 Coordinator Support',  desc: 'Our coordinators are available around the clock for any questions.' },
-              ].map(f => (
-                <div key={f.title} className="card p-4 flex gap-4 items-start">
-                  <div className="w-2 h-2 rounded-full bg-accent-400 flex-shrink-0 mt-2" />
-                  <div>
-                    <h4 className="text-body-sm font-bold font-poppins text-neutral-800 mb-0.5">{f.title}</h4>
-                    <p className="text-body-sm text-neutral-500">{f.desc}</p>
+          </div>
+        </div>
+      </section>
+
+      {/* Image 2 — Right image, left text */}
+      <section className="section-pad" style={{ background: 'var(--color-bg-soft)' }}>
+        <div className="container-max">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            <div>
+              <div className="section-label mb-3">Who We Help</div>
+              <h2 className="text-display-sm mb-5">Who This Service Is For</h2>
+              <div className="flex flex-col gap-4">
+                {whoItems.map((f: any) => (
+                  <div key={f.title} className="card p-4 flex gap-4 items-start">
+                    <div className="w-2 h-2 rounded-full bg-accent-400 flex-shrink-0 mt-2" />
+                    <div>
+                      <h4 className="text-body-sm font-bold font-poppins text-neutral-800 mb-0.5">{f.title}</h4>
+                      <p className="text-body-sm text-neutral-500">{f.desc}</p>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
+            </div>
+            <div className="h-[520px] rounded-3xl overflow-hidden shadow-lg">
+              <img
+                src="/images/Home Wellness/Smoking Cessation Programs.png"
+                alt="Home Wellness Services at home Qatar"
+                className="w-full h-full object-cover"
+              />
             </div>
           </div>
         </div>
       </section>
 
-      {/* Image 2 */}
-      <section className="w-full">
-        <img
-          src="/images/Home Wellness/Smoking Cessation Programs.png"
-          alt="Home Wellness Services at home Qatar"
-          className="w-full h-72 md:h-96 object-cover"
-        />
-      </section>
-
-      {/* Why Choose */}
-      <section className="section-pad" style={{ background: 'var(--color-bg-soft)' }}>
+      {/* Image 3 — Left image, right text */}
+      <section className="section-pad bg-white">
         <div className="container-max">
-          <div className="section-header">
-            <div className="section-label justify-center mb-3">Why Aethla Care</div>
-            <h2 className="text-display-sm mb-4">Why Choose Aethla Care</h2>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mt-10">
-            {[
-              { title: 'Qualified Professionals',   desc: 'Every caregiver is Ministry of Health verified, background checked, and regularly trained.' },
-              { title: 'Personalised Care Plans',   desc: 'Every care arrangement is tailored to the individual — no generic packages.' },
-              { title: 'Multilingual Team',         desc: 'We match caregivers by language and cultural background for a comfortable experience.' },
-              { title: 'Family Portal Access',      desc: 'Family members can monitor visits, read care notes, and communicate with the care team online.' },
-              { title: 'Flexible Scheduling',       desc: 'Choose from daily visits, live-in care, overnight support, or part-time arrangements.' },
-              { title: '24/7 Coordinator Support',  desc: 'Our care coordinators are available around the clock for questions and urgent situations.' },
-            ].map(f => (
-              <div key={f.title} className="card p-6">
-                <h3 className="text-heading-sm font-poppins text-primary-500 mb-2">{f.title}</h3>
-                <p className="text-body-sm text-neutral-500 leading-relaxed">{f.desc}</p>
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            <div className="h-[420px] rounded-3xl overflow-hidden shadow-lg">
+              <img
+                src="/images/Home Wellness/Weight Management.png"
+                alt="Home Wellness Services Aethla Care Qatar"
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <div>
+              <div className="section-label mb-3">Why Aethla Care</div>
+              <h2 className="text-display-sm mb-5">Why Choose Aethla Care</h2>
+              <div className="flex flex-col gap-4">
+                {[
+                  { title: 'Licensed Professionals',   desc: 'Every caregiver is Ministry of Health verified, background checked, and regularly trained.' },
+                  { title: 'Personalised Care Plans',  desc: 'Every care arrangement is tailored to the individual — no generic packages.' },
+                  { title: 'Multilingual Team',        desc: 'We match caregivers by language and cultural background for a comfortable experience.' },
+                  { title: 'Family Portal Access',     desc: 'Family members can monitor visits, read care notes, and communicate with the care team online.' },
+                  { title: 'Flexible Scheduling',      desc: 'Choose from daily visits, live-in care, overnight support, or part-time arrangements.' },
+                  { title: '24/7 Coordinator Support', desc: 'Our care coordinators are available around the clock for questions and urgent situations.' },
+                ].map(f => (
+                  <div key={f.title} className="card p-4 flex gap-4 items-start">
+                    <div className="w-2 h-2 rounded-full bg-accent-400 flex-shrink-0 mt-2" />
+                    <div>
+                      <h4 className="text-body-sm font-bold font-poppins text-neutral-800 mb-0.5">{f.title}</h4>
+                      <p className="text-body-sm text-neutral-500">{f.desc}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
           </div>
         </div>
-      </section>
-
-      {/* Image 3 */}
-      <section className="w-full">
-        <img
-          src="/images/Home Wellness/Weight Management.png"
-          alt="Aethla Care Qatar home healthcare"
-          className="w-full h-72 md:h-96 object-cover"
-        />
       </section>
 
       {/* CTA */}
