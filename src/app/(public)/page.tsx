@@ -190,7 +190,7 @@ export default function HomePage() {
             </div>
             <div className="hidden lg:block">
               <div className="glass-card overflow-hidden">
-                <div className="h-[320px] w-full" style={{
+                <div className="h-full w-full" style={{
                   backgroundImage: "url('/images/aethladoctor.jpeg')",
                   backgroundSize: 'cover', backgroundPosition: 'center',
                 }} />
@@ -248,8 +248,8 @@ export default function HomePage() {
       <section className="section-pad" style={{ background: 'var(--color-bg-soft)' }}>
         <div className="container-max">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
-            <div className="h-[460px] rounded-4xl" style={{
-              backgroundImage: "url('/images/aethladoctor2.jpg')",
+            <div className="h-full rounded-4xl" style={{
+              backgroundImage: "url('/images/aethladoctor2.jpeg')",
               backgroundSize: 'cover', backgroundPosition: 'center',
               boxShadow: '0 20px 60px rgba(27,107,138,0.16)',
             }} />
