@@ -10,28 +10,30 @@ export default function ElderlyCare() {
   return (
     <>
       {/* Hero */}
-      <section className="relative min-h-[480px] flex items-end pb-16 overflow-hidden">
-        <div className="absolute inset-0">
-          {/* HERO IMAGE 1 — Replace src with client image */}
-          <img
-            src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=1920&q=80&auto=format&fit=crop"
-            alt="Elderly Care at Home Qatar"
-            className="w-full h-full object-cover"
-          />
-          <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, rgba(13,43,62,0.92) 0%, rgba(13,43,62,0.5) 60%, transparent 100%)' }} />
-        </div>
-        <div className="container-max px-4 md:px-8 relative z-10">
-          <div className="trust-pill inline-flex mb-4">
+      <section className="bg-section-gradient py-28 px-4 text-center relative overflow-hidden">
+        <div className="absolute inset-0 opacity-[0.04]"
+          style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '32px 32px' }} />
+        <div className="relative z-10">
+          <div className="trust-pill inline-flex mb-5 justify-center">
             <span className="w-2 h-2 rounded-full bg-accent-400" /> Elderly Care
           </div>
-          <h1 className="text-display-lg text-white mb-3">Elderly Care at Home in Qatar</h1>
-          <p className="text-body-lg text-white/75 max-w-2xl">
+          <h1 className="text-display-lg text-white mb-4">Elderly Care at Home in Qatar</h1>
+          <p className="text-body-lg text-white/75 max-w-2xl mx-auto">
             Compassionate, professional in-home care for elderly family members — supporting independence, dignity, and wellbeing at every stage.
           </p>
         </div>
       </section>
 
-      {/* About the Service */}
+      {/* Image 1 */}
+      <section className="w-full">
+        <img
+          src="/images/Elderly Care/Medication Reminders.png"
+          alt="Elderly Care Qatar"
+          className="w-full h-72 md:h-96 object-cover"
+        />
+      </section>
+
+      {/* About */}
       <section className="section-pad bg-white">
         <div className="container-max">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
@@ -42,7 +44,7 @@ export default function ElderlyCare() {
                 Aethla Care provides qualified caregivers who support elderly clients with the activities of daily living — from personal hygiene and meal preparation to medication reminders, mobility support, and meaningful companionship.
               </p>
               <p className="text-body-md text-neutral-600 leading-relaxed mb-8">
-                Our care is delivered in the comfort and familiarity of your family member&apos;s own home, maintaining their independence and quality of life while giving families complete peace of mind.
+                Our care is delivered in the comfort of your family member&apos;s own home, maintaining their independence and quality of life while giving families complete peace of mind.
               </p>
               <ul className="flex flex-col gap-3">
                 {[
@@ -66,41 +68,33 @@ export default function ElderlyCare() {
                 ))}
               </ul>
             </div>
-
-            {/* IMAGE 2 — Replace src with client image */}
-            <div className="relative">
-              <div className="rounded-3xl overflow-hidden shadow-xl h-[460px]">
-                <img
-                  src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&q=80&auto=format&fit=crop"
-                  alt="Elderly care caregiver with patient"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="absolute -bottom-4 -right-4 card p-5 max-w-[200px] shadow-lg">
-                <p className="text-2xl font-extrabold font-poppins text-primary-500 mb-0.5">24/7</p>
-                <p className="text-caption text-neutral-500">Care coordinator support available</p>
-              </div>
+            <div className="flex flex-col gap-5">
+              {[
+                { title: 'Licensed Care Professionals',   desc: 'All caregivers are Ministry of Health verified and background checked.' },
+                { title: 'Personalised Care Plans',       desc: 'Every arrangement is tailored to the individual — no generic packages.' },
+                { title: 'Multilingual Team',             desc: 'We match caregivers by language for a comfortable experience.' },
+                { title: '24/7 Coordinator Support',      desc: 'Our coordinators are available around the clock for any questions.' },
+              ].map(f => (
+                <div key={f.title} className="card p-4 flex gap-4 items-start">
+                  <div className="w-2 h-2 rounded-full bg-accent-400 flex-shrink-0 mt-2" />
+                  <div>
+                    <h4 className="text-body-sm font-bold font-poppins text-neutral-800 mb-0.5">{f.title}</h4>
+                    <p className="text-body-sm text-neutral-500">{f.desc}</p>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
       </section>
 
-      {/* IMAGE 3 — Full width section with client image */}
-      <section className="relative h-72 md:h-96 overflow-hidden">
+      {/* Image 2 */}
+      <section className="w-full">
         <img
-          src="https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=1920&q=80&auto=format&fit=crop"
-          alt="Elderly care home environment"
-          className="w-full h-full object-cover"
+          src="/images/Elderly Care/Mobility Assistance.png"
+          alt="Elderly care caregiver"
+          className="w-full h-72 md:h-96 object-cover"
         />
-        <div className="absolute inset-0 flex items-center justify-center"
-          style={{ background: 'rgba(13,43,62,0.65)' }}>
-          <div className="text-center px-4">
-            <p className="text-display-sm text-white mb-4">
-              &ldquo;Our caregivers become part of the family.&rdquo;
-            </p>
-            <p className="text-body-lg text-white/70">Aethla Care — Qatar&apos;s trusted home healthcare provider</p>
-          </div>
-        </div>
       </section>
 
       {/* Who Is This For */}
@@ -112,12 +106,12 @@ export default function ElderlyCare() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mt-10">
             {[
-              { title: 'Elderly Living Alone',         desc: 'Regular visits and check-ins for elderly individuals living independently who need support and companionship.' },
-              { title: 'Post-Hospital Recovery',       desc: 'Transitional care at home following hospital discharge, supporting safe and complete recovery.' },
-              { title: 'Chronic Condition Management', desc: 'Ongoing daily support for elderly clients managing long-term conditions such as diabetes, dementia, or cardiovascular disease.' },
-              { title: 'Mobility Challenges',          desc: 'Support for elderly individuals with limited mobility — assisting with movement, transfers, and fall prevention.' },
-              { title: 'Family Respite',               desc: 'Relief for family members who are primary caregivers, allowing them time to rest while loved ones are well cared for.' },
-              { title: 'Dementia & Memory Care',       desc: 'Specialist support for elderly clients living with dementia — maintaining routine, safety, and dignity.' },
+              { title: 'Elderly Living Alone',         desc: 'Regular visits for elderly individuals who need support and companionship.' },
+              { title: 'Post-Hospital Recovery',       desc: 'Transitional care following hospital discharge for safe recovery at home.' },
+              { title: 'Chronic Condition Management', desc: 'Ongoing daily support for managing long-term conditions such as diabetes or dementia.' },
+              { title: 'Mobility Challenges',          desc: 'Support for individuals with limited mobility — movement, transfers, and fall prevention.' },
+              { title: 'Family Respite',               desc: 'Relief for family members who are primary caregivers, allowing them time to rest.' },
+              { title: 'Dementia & Memory Care',       desc: 'Specialist support for clients living with dementia — maintaining routine and safety.' },
             ].map(f => (
               <div key={f.title} className="card p-6">
                 <h3 className="text-heading-sm font-poppins text-primary-500 mb-2">{f.title}</h3>
@@ -126,6 +120,15 @@ export default function ElderlyCare() {
             ))}
           </div>
         </div>
+      </section>
+
+      {/* Image 3 */}
+      <section className="w-full">
+        <img
+          src="/images/Elderly Care/Overnight Care.png"
+          alt="Home care environment"
+          className="w-full h-72 md:h-96 object-cover"
+        />
       </section>
 
       {/* CTA */}

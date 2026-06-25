@@ -85,22 +85,15 @@ export default function EmployeeLoginPage() {
       <div className="min-h-screen flex items-center justify-center px-4"
         style={{ background: 'linear-gradient(165deg, #0D2B3E 0%, #134F66 60%, #1B6B8A 100%)' }}>
         <div className="bg-white rounded-3xl p-10 shadow-2xl w-full max-w-md text-center">
-          <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-5"
-            style={{ background: 'rgba(45,168,138,0.1)' }}>
+          <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-5" style={{ background: 'rgba(45,168,138,0.1)' }}>
             <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{ color: '#2DA88A' }}>
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
           </div>
           <h2 className="text-heading-xl font-poppins text-neutral-800 mb-3">Application Submitted</h2>
-          <p className="text-body-md text-neutral-500 mb-2">
-            Your employee application has been received and is pending review by our administration team.
-          </p>
-          <p className="text-body-sm text-neutral-400 mb-6">
-            We will contact you at <strong>{signupForm.email}</strong> once your application has been reviewed.
-          </p>
-          <button onClick={() => { setSuccess(false); setTab('login') }} className="btn-outline btn-sm">
-            Back to Login
-          </button>
+          <p className="text-body-md text-neutral-500 mb-2">Your application has been received and is pending review.</p>
+          <p className="text-body-sm text-neutral-400 mb-6">We will contact you at <strong>{signupForm.email}</strong> once reviewed.</p>
+          <button onClick={() => { setSuccess(false); setTab('login') }} className="btn-outline btn-sm">Back to Login</button>
         </div>
       </div>
     )
@@ -121,14 +114,11 @@ export default function EmployeeLoginPage() {
         </div>
 
         <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
-          {/* Tabs */}
           <div className="flex border-b border-neutral-100">
             {(['login', 'signup'] as Tab[]).map(t => (
               <button key={t} onClick={() => { setTab(t); setError('') }}
                 className={`flex-1 py-4 text-body-sm font-semibold transition-all ${
-                  tab === t
-                    ? 'text-primary-500 border-b-2 border-primary-500 bg-primary-50'
-                    : 'text-neutral-500 hover:text-neutral-700'
+                  tab === t ? 'text-primary-500 border-b-2 border-primary-500 bg-primary-50' : 'text-neutral-500 hover:text-neutral-700'
                 }`}>
                 {t === 'login' ? 'Sign In' : 'Apply to Join'}
               </button>
@@ -139,9 +129,8 @@ export default function EmployeeLoginPage() {
             {/* LOGIN */}
             {tab === 'login' && (
               <form onSubmit={handleLogin} className="space-y-4">
-                <p className="text-body-sm text-neutral-400 mb-2">Sign in to access your shifts and care tools.</p>
                 <div>
-                  <label className="form-label">Email Address</label>
+                  <label className="form-label">Email Address <span className="text-red-500">*</span></label>
                   <div className="relative">
                     <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400" />
                     <input type="email" value={loginForm.email} onChange={e => setLogin('email', e.target.value)}
@@ -149,7 +138,7 @@ export default function EmployeeLoginPage() {
                   </div>
                 </div>
                 <div>
-                  <label className="form-label">Password</label>
+                  <label className="form-label">Password <span className="text-red-500">*</span></label>
                   <div className="relative">
                     <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400" />
                     <input type={showPw ? 'text' : 'password'} value={loginForm.password}
@@ -161,29 +150,16 @@ export default function EmployeeLoginPage() {
                     </button>
                   </div>
                 </div>
-                {error && (
-                  <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3">
-                    <p className="text-body-sm text-red-600">{error}</p>
-                  </div>
-                )}
+                {error && <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3"><p className="text-body-sm text-red-600">{error}</p></div>}
                 <button type="submit" disabled={isLoading} className="btn-primary btn-lg w-full">
                   {isLoading ? 'Signing in...' : 'Sign In'}
                 </button>
-                <p className="text-caption text-neutral-400 text-center">
-                  Want to join our team?{' '}
-                  <button type="button" onClick={() => setTab('signup')} className="text-primary-500 hover:underline font-semibold">
-                    Apply here
-                  </button>
-                </p>
               </form>
             )}
 
             {/* SIGNUP */}
             {tab === 'signup' && (
               <form onSubmit={handleSignup} className="space-y-4">
-                <p className="text-body-sm text-neutral-400 mb-2">
-                  Apply to join the Aethla Care team. Your application will be reviewed within 3-5 working days.
-                </p>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="form-label">First Name <span className="text-red-500">*</span></label>
@@ -191,9 +167,9 @@ export default function EmployeeLoginPage() {
                       className="form-input" placeholder="Ahmed" required />
                   </div>
                   <div>
-                    <label className="form-label">Last Name</label>
+                    <label className="form-label">Last Name <span className="text-red-500">*</span></label>
                     <input value={signupForm.lastName} onChange={e => setSignup('lastName', e.target.value)}
-                      className="form-input" placeholder="Al-Rashid" />
+                      className="form-input" placeholder="Al-Rashid" required />
                   </div>
                 </div>
                 <div>
@@ -205,11 +181,11 @@ export default function EmployeeLoginPage() {
                   </div>
                 </div>
                 <div>
-                  <label className="form-label">Phone Number</label>
+                  <label className="form-label">Phone Number <span className="text-red-500">*</span></label>
                   <div className="relative">
                     <Phone size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400" />
                     <input type="tel" value={signupForm.phone} onChange={e => setSignup('phone', e.target.value)}
-                      className="form-input pl-10" placeholder="+974 5500 0000" />
+                      className="form-input pl-10" placeholder="+974 5500 0000" required />
                   </div>
                 </div>
                 <div>
@@ -222,16 +198,16 @@ export default function EmployeeLoginPage() {
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="form-label">License Number</label>
+                    <label className="form-label">License Number <span className="text-red-500">*</span></label>
                     <div className="relative">
                       <FileText size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400" />
                       <input value={signupForm.licenseNumber} onChange={e => setSignup('licenseNumber', e.target.value)}
-                        className="form-input pl-10" placeholder="MOH-XXXXX" />
+                        className="form-input pl-10" placeholder="MOH-XXXXX" required />
                     </div>
                   </div>
                   <div>
-                    <label className="form-label">Years Experience</label>
-                    <select value={signupForm.experience} onChange={e => setSignup('experience', e.target.value)} className="form-input">
+                    <label className="form-label">Years Experience <span className="text-red-500">*</span></label>
+                    <select value={signupForm.experience} onChange={e => setSignup('experience', e.target.value)} className="form-input" required>
                       <option value="">Select...</option>
                       <option value="0-1">Less than 1 year</option>
                       <option value="1-3">1 to 3 years</option>
@@ -252,15 +228,9 @@ export default function EmployeeLoginPage() {
                       className="form-input" placeholder="Repeat" required />
                   </div>
                 </div>
-                {error && (
-                  <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3">
-                    <p className="text-body-sm text-red-600">{error}</p>
-                  </div>
-                )}
+                {error && <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3"><p className="text-body-sm text-red-600">{error}</p></div>}
                 <div className="p-3 rounded-xl bg-amber-50 border border-amber-200">
-                  <p className="text-caption text-amber-700">
-                    Applications are reviewed within 3-5 working days. You will be contacted via email once approved.
-                  </p>
+                  <p className="text-caption text-amber-700">Applications are reviewed within 3-5 working days.</p>
                 </div>
                 <button type="submit" className="btn-primary btn-lg w-full">Submit Application</button>
               </form>
