@@ -6,6 +6,7 @@ import { useAuthStore } from '@/lib/auth'
 import apiClient from '@/lib/api'
 import { PageHeader } from '@/components/ui/index'
 import toast from 'react-hot-toast'
+import { Eye, EyeOff } from 'lucide-react'
 
 const tabs = ['General', 'Users & Roles', 'Notifications', 'Security', 'Billing']
 
@@ -22,24 +23,23 @@ export default function SettingsPage() {
   const qc = useQueryClient()
   const [activeTab, setActiveTab] = useState('General')
 
-  // Load settings from DB
+  // ── General Settings ──────────────────────────────────────
   const { data: settings, isLoading } = useQuery({
     queryKey: ['settings'],
     queryFn: () => apiClient.get('/settings').then(r => r.data),
   })
 
   const [general, setGeneral] = useState({
-    companyName: 'Aethla Care',
-    phone: '+974 4000 0000',
+    companyName:    'Aethla Care',
+    phone:          '+974 4000 0000',
     emergencyPhone: '+974 6000 0000',
-    email: 'info@aethlacare.com',
+    email:          'info@aethlacare.com',
     whatsappNumber: '97440000000',
-    address: 'West Bay, Doha, Qatar',
-    currency: 'QAR',
-    timezone: 'Asia/Qatar',
+    address:        'West Bay, Doha, Qatar',
+    currency:       'QAR',
+    timezone:       'Asia/Qatar',
   })
 
-  // Populate form when settings load
   useEffect(() => {
     if (settings) {
       setGeneral({
@@ -64,6 +64,7 @@ export default function SettingsPage() {
     onError: () => toast.error('Failed to save settings'),
   })
 
+  // ── Notifications ─────────────────────────────────────────
   const [notifications, setNotifications] = useState({
     emailOnNewClient:   true,
     emailOnIncident:    true,
@@ -73,12 +74,52 @@ export default function SettingsPage() {
     smsOnIncident:      true,
   })
 
+  // ── Security ──────────────────────────────────────────────
   const [security, setSecurity] = useState({
     sessionTimeout: '60',
     mfaRequired:    false,
     passwordExpiry: '90',
     auditLogs:      true,
   })
+
+  // Master Admin credentials
+  const [showPw, setShowPw]         = useState(false)
+  const [showNewPw, setShowNewPw]   = useState(false)
+  const [savingCreds, setSavingCreds] = useState(false)
+  const [adminForm, setAdminForm]   = useState({
+    email:           '',
+    newPassword:     '',
+    confirmPassword: '',
+  })
+
+  const handleAdminUpdate = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (adminForm.newPassword && adminForm.newPassword !== adminForm.confirmPassword) {
+      toast.error('Passwords do not match')
+      return
+    }
+    if (adminForm.newPassword && adminForm.newPassword.length < 8) {
+      toast.error('Password must be at least 8 characters')
+      return
+    }
+    const dto: any = {}
+    if (adminForm.email)       dto.email    = adminForm.email
+    if (adminForm.newPassword) dto.password = adminForm.newPassword
+    if (!dto.email && !dto.password) {
+      toast.error('Enter new email or password to update')
+      return
+    }
+    setSavingCreds(true)
+    try {
+      await apiClient.patch(`/users/${user?._id}`, dto)
+      toast.success('Admin credentials updated — please log in again with the new details')
+      setAdminForm({ email: '', newPassword: '', confirmPassword: '' })
+    } catch {
+      toast.error('Failed to update credentials')
+    } finally {
+      setSavingCreds(false)
+    }
+  }
 
   return (
     <div>
@@ -103,7 +144,6 @@ export default function SettingsPage() {
           <p className="text-body-sm text-neutral-400 mb-5">
             Changes here are reflected on the website footer, contact page, and WhatsApp button automatically.
           </p>
-
           {isLoading ? (
             <div className="space-y-3">{[1,2,3,4].map(i => <div key={i} className="skeleton h-12 rounded-xl" />)}</div>
           ) : (
@@ -151,7 +191,6 @@ export default function SettingsPage() {
                   <option value="UTC">UTC</option>
                 </select>
               </div>
-
               <div className="p-4 rounded-xl bg-blue-50 border border-blue-200">
                 <p className="text-body-sm text-blue-700 font-semibold mb-1">What updates automatically:</p>
                 <ul className="text-body-sm text-blue-600 flex flex-col gap-1">
@@ -161,12 +200,7 @@ export default function SettingsPage() {
                   <li>Emergency care line — emergency phone</li>
                 </ul>
               </div>
-
-              <button
-                onClick={() => updateMutation.mutate(general)}
-                disabled={updateMutation.isPending}
-                className="btn-primary btn-lg"
-              >
+              <button onClick={() => updateMutation.mutate(general)} disabled={updateMutation.isPending} className="btn-primary btn-lg">
                 {updateMutation.isPending ? 'Saving...' : 'Save Changes'}
               </button>
             </div>
@@ -216,10 +250,10 @@ export default function SettingsPage() {
           <div className="space-y-3">
             <p className="text-caption text-neutral-400 uppercase tracking-wider">Email Notifications</p>
             {[
-              { key: 'emailOnNewClient',   label: 'New client registered'                          },
-              { key: 'emailOnIncident',    label: 'Incident reported'                              },
-              { key: 'emailOnMissedVisit', label: 'Missed visit detected'                          },
-              { key: 'emailOnNewConsult',  label: 'New consultation request from website'          },
+              { key: 'emailOnNewClient',   label: 'New client registered'                     },
+              { key: 'emailOnIncident',    label: 'Incident reported'                         },
+              { key: 'emailOnMissedVisit', label: 'Missed visit detected'                     },
+              { key: 'emailOnNewConsult',  label: 'New consultation request from website'     },
             ].map(n => (
               <label key={n.key} className="flex items-center justify-between p-4 rounded-2xl border border-neutral-100 hover:bg-neutral-50 cursor-pointer transition-colors">
                 <span className="text-body-sm font-medium text-neutral-700">{n.label}</span>
@@ -251,48 +285,123 @@ export default function SettingsPage() {
 
       {/* Security */}
       {activeTab === 'Security' && (
-        <div className="card p-6 max-w-2xl">
-          <h3 className="text-heading-md font-poppins mb-5">Security Settings</h3>
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="form-label">Session Timeout (minutes)</label>
-                <select value={security.sessionTimeout} onChange={e => setSecurity(p => ({ ...p, sessionTimeout: e.target.value }))} className="form-input">
-                  <option value="30">30 minutes</option>
-                  <option value="60">60 minutes</option>
-                  <option value="120">2 hours</option>
-                  <option value="480">8 hours</option>
-                </select>
+        <div className="space-y-6 max-w-2xl">
+
+          {/* Master Admin Credentials */}
+          <div className="card p-6">
+            <h3 className="text-heading-md font-poppins mb-2">Master Admin Login</h3>
+            <p className="text-body-sm text-neutral-400 mb-5">
+              Change the master admin email and/or password. Changes update the database immediately.
+            </p>
+
+            <div className="flex items-center gap-4 p-4 rounded-2xl bg-neutral-50 mb-5">
+              <div className="w-10 h-10 rounded-full bg-primary-50 flex items-center justify-center text-primary-600 font-bold font-poppins text-sm">
+                {user?.firstName?.[0]}{user?.lastName?.[0]}
               </div>
               <div>
-                <label className="form-label">Password Expiry (days)</label>
-                <select value={security.passwordExpiry} onChange={e => setSecurity(p => ({ ...p, passwordExpiry: e.target.value }))} className="form-input">
-                  <option value="30">30 days</option>
-                  <option value="60">60 days</option>
-                  <option value="90">90 days</option>
-                  <option value="never">Never</option>
-                </select>
+                <p className="text-body-sm font-semibold text-neutral-800">{user?.firstName} {user?.lastName}</p>
+                <p className="text-caption text-neutral-500">{user?.email} · <span className="capitalize">{user?.role}</span></p>
               </div>
             </div>
-            {[
-              { key: 'auditLogs',   label: 'Enable audit logs',          hint: 'Record all user actions for compliance.' },
-              { key: 'mfaRequired', label: 'Require MFA for admin users', hint: 'Multi-factor authentication for extra security.' },
-            ].map(s => (
-              <label key={s.key} className="flex items-start justify-between p-4 rounded-2xl border border-neutral-100 hover:bg-neutral-50 cursor-pointer transition-colors gap-4">
-                <div>
-                  <p className="text-body-sm font-medium text-neutral-700">{s.label}</p>
-                  <p className="text-caption text-neutral-400 mt-0.5">{s.hint}</p>
+
+            <form onSubmit={handleAdminUpdate} className="space-y-4">
+              <div>
+                <label className="form-label">New Email Address <span className="text-caption text-neutral-400">(leave blank to keep current)</span></label>
+                <input
+                  type="email"
+                  value={adminForm.email}
+                  onChange={e => setAdminForm(p => ({ ...p, email: e.target.value }))}
+                  className="form-input"
+                  placeholder="newemail@aethlacare.com"
+                />
+              </div>
+              <div>
+                <label className="form-label">New Password <span className="text-caption text-neutral-400">(leave blank to keep current)</span></label>
+                <div className="relative">
+                  <input
+                    type={showPw ? 'text' : 'password'}
+                    value={adminForm.newPassword}
+                    onChange={e => setAdminForm(p => ({ ...p, newPassword: e.target.value }))}
+                    className="form-input pr-10"
+                    placeholder="Min. 8 characters"
+                  />
+                  <button type="button" onClick={() => setShowPw(!showPw)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600">
+                    {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
                 </div>
-                <input type="checkbox"
-                  checked={security[s.key as keyof typeof security] as boolean}
-                  onChange={e => setSecurity(p => ({ ...p, [s.key]: e.target.checked }))}
-                  className="w-5 h-5 rounded accent-primary-500 flex-shrink-0" />
-              </label>
-            ))}
-            <div className="p-4 rounded-2xl" style={{ background: 'var(--color-primary-light)' }}>
-              <p className="text-body-sm text-primary-700">Platform is built to HIPAA-inspired standards with SSL encryption, role-based access control, and secure automated backups.</p>
+              </div>
+              <div>
+                <label className="form-label">Confirm New Password</label>
+                <div className="relative">
+                  <input
+                    type={showNewPw ? 'text' : 'password'}
+                    value={adminForm.confirmPassword}
+                    onChange={e => setAdminForm(p => ({ ...p, confirmPassword: e.target.value }))}
+                    className="form-input pr-10"
+                    placeholder="Repeat new password"
+                  />
+                  <button type="button" onClick={() => setShowNewPw(!showNewPw)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600">
+                    {showNewPw ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
+              </div>
+              <div className="p-3 rounded-xl bg-amber-50 border border-amber-200">
+                <p className="text-caption text-amber-700 font-semibold">
+                  After changing credentials, you will be logged out and must sign in again with the new details.
+                </p>
+              </div>
+              <button type="submit" disabled={savingCreds} className="btn-primary btn-lg">
+                {savingCreds ? 'Updating...' : 'Update Admin Credentials'}
+              </button>
+            </form>
+          </div>
+
+          {/* Other Security Settings */}
+          <div className="card p-6">
+            <h3 className="text-heading-md font-poppins mb-5">Security Configuration</h3>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="form-label">Session Timeout</label>
+                  <select value={security.sessionTimeout} onChange={e => setSecurity(p => ({ ...p, sessionTimeout: e.target.value }))} className="form-input">
+                    <option value="30">30 minutes</option>
+                    <option value="60">60 minutes</option>
+                    <option value="120">2 hours</option>
+                    <option value="480">8 hours</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="form-label">Password Expiry</label>
+                  <select value={security.passwordExpiry} onChange={e => setSecurity(p => ({ ...p, passwordExpiry: e.target.value }))} className="form-input">
+                    <option value="30">30 days</option>
+                    <option value="60">60 days</option>
+                    <option value="90">90 days</option>
+                    <option value="never">Never</option>
+                  </select>
+                </div>
+              </div>
+              {[
+                { key: 'auditLogs',   label: 'Enable audit logs',           hint: 'Record all user actions for compliance.' },
+                { key: 'mfaRequired', label: 'Require MFA for admin users',  hint: 'Multi-factor authentication for extra security.' },
+              ].map(s => (
+                <label key={s.key} className="flex items-start justify-between p-4 rounded-2xl border border-neutral-100 hover:bg-neutral-50 cursor-pointer transition-colors gap-4">
+                  <div>
+                    <p className="text-body-sm font-medium text-neutral-700">{s.label}</p>
+                    <p className="text-caption text-neutral-400 mt-0.5">{s.hint}</p>
+                  </div>
+                  <input type="checkbox"
+                    checked={security[s.key as keyof typeof security] as boolean}
+                    onChange={e => setSecurity(p => ({ ...p, [s.key]: e.target.checked }))}
+                    className="w-5 h-5 rounded accent-primary-500 flex-shrink-0" />
+                </label>
+              ))}
+              <div className="p-4 rounded-2xl" style={{ background: 'var(--color-primary-light)' }}>
+                <p className="text-body-sm text-primary-700">Platform is built to HIPAA-inspired standards with SSL encryption, role-based access control, and secure automated backups.</p>
+              </div>
+              <button onClick={() => toast.success('Security settings saved')} className="btn-primary btn-lg">Save Changes</button>
             </div>
-            <button onClick={() => toast.success('Security settings saved')} className="btn-primary btn-lg">Save Changes</button>
           </div>
         </div>
       )}
