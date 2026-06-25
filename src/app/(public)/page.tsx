@@ -190,15 +190,15 @@ export default function HomePage() {
             </div>
             <div className="hidden lg:block">
               <div className="glass-card overflow-hidden">
-                <div className="h-full w-full" style={{
-                  backgroundImage: "url('/images/aethladoctor.jpeg')",
-                  backgroundSize: 'cover', backgroundPosition: 'center',
-                }} />
-                <div className="p-5">
-                  <p className="text-body-sm font-semibold font-poppins text-white mb-1">Trusted by Families Across Qatar</p>
-                  <p className="text-caption text-white/60">Professional home healthcare at every stage of life</p>
-                </div>
-              </div>
+  <div className="h-[600px] w-full" style={{
+    backgroundImage: "url('/images/aethladoctor.jpeg')",
+    backgroundSize: 'cover', backgroundPosition: 'center top',
+  }} />
+  <div className="p-5">
+    <p className="text-body-sm font-semibold font-poppins text-white mb-1">Trusted by Families Across Qatar</p>
+    <p className="text-caption text-white/60">Professional home healthcare at every stage of life</p>
+  </div>
+</div>
             </div>
           </div>
         </div>
