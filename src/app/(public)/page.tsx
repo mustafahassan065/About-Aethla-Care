@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import type { Metadata } from 'next'
 import Link from 'next/link'
 
 const services = [
@@ -39,6 +38,81 @@ const staticFaqs = [
   { q: 'Are your caregivers licensed and background checked?',             a: 'Yes. Every caregiver is verified by the Qatar Ministry of Health, has passed a full background check, and receives ongoing training.' },
   { q: 'What is the family portal?',                                       a: 'The family portal gives family members secure online access to view schedules, read care notes, check billing, and communicate with the care team.' },
 ]
+
+// Slideshow images for hero background — replace with client images as needed
+const heroSlides = [
+  'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=1920&q=80&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=1920&q=80&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=1920&q=80&auto=format&fit=crop',
+  'https://images.unsplash.com/photo-1516627145497-ae6968895b74?w=1920&q=80&auto=format&fit=crop',
+]
+
+function HeroSlideshow() {
+  const [current, setCurrent] = useState(0)
+  const [prev, setPrev]       = useState<number | null>(null)
+  const [fading, setFading]   = useState(false)
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setFading(true)
+      setTimeout(() => {
+        setPrev(current)
+        setCurrent(c => (c + 1) % heroSlides.length)
+        setFading(false)
+      }, 800)
+    }, 4500)
+    return () => clearInterval(timer)
+  }, [current])
+
+  return (
+    <div className="absolute inset-0 overflow-hidden">
+      {/* Previous slide — stays visible during fade */}
+      {prev !== null && (
+        <div
+          key={`prev-${prev}`}
+          className="absolute inset-0"
+          style={{
+            backgroundImage: `url('${heroSlides[prev]}')`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            opacity: 0.18,
+            mixBlendMode: 'luminosity',
+          }}
+        />
+      )}
+      {/* Current slide */}
+      <div
+        key={`curr-${current}`}
+        className="absolute inset-0 transition-opacity"
+        style={{
+          backgroundImage: `url('${heroSlides[current]}')`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          opacity: fading ? 0 : 0.18,
+          mixBlendMode: 'luminosity',
+          transitionDuration: '800ms',
+          transitionTimingFunction: 'ease-in-out',
+        }}
+      />
+      {/* Slide indicators */}
+      <div className="absolute bottom-6 right-8 flex gap-2 z-10">
+        {heroSlides.map((_, i) => (
+          <button
+            key={i}
+            onClick={() => { setPrev(current); setCurrent(i) }}
+            className="transition-all duration-300"
+            style={{
+              width: i === current ? '24px' : '8px',
+              height: '8px',
+              borderRadius: '4px',
+              background: i === current ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.35)',
+            }}
+          />
+        ))}
+      </div>
+    </div>
+  )
+}
 
 function FAQSection() {
   const [faqs, setFaqs] = useState(staticFaqs)
@@ -91,10 +165,11 @@ export default function HomePage() {
       {/* HERO */}
       <section className="relative min-h-[calc(100vh-76px)] flex items-center overflow-hidden">
         <div className="absolute inset-0 bg-hero-gradient" />
-        <div className="absolute inset-0" style={{
-          backgroundImage: "url('https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=1920&q=80&auto=format&fit=crop')",
-          backgroundSize: 'cover', backgroundPosition: 'center', opacity: 0.12, mixBlendMode: 'luminosity',
-        }} />
+
+        {/* Dynamic sliding background images */}
+        <HeroSlideshow />
+
+        {/* Dot pattern overlay */}
         <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '40px 40px' }} />
 
         <div className="container-max px-4 md:px-8 relative z-10 py-16">
@@ -116,7 +191,7 @@ export default function HomePage() {
             <div className="hidden lg:block">
               <div className="glass-card overflow-hidden">
                 <div className="h-[320px] w-full" style={{
-                  backgroundImage: "url('https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=800&q=80&auto=format&fit=crop')",
+                  backgroundImage: "/images/aethladoctor.jpeg",
                   backgroundSize: 'cover', backgroundPosition: 'center',
                 }} />
                 <div className="p-5">
@@ -174,7 +249,7 @@ export default function HomePage() {
         <div className="container-max">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div className="h-[460px] rounded-4xl" style={{
-              backgroundImage: "url('https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=800&q=80&auto=format&fit=crop')",
+              backgroundImage: "/images/aethladoctor2.jpg",
               backgroundSize: 'cover', backgroundPosition: 'center',
               boxShadow: '0 20px 60px rgba(27,107,138,0.16)',
             }} />
