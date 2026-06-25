@@ -191,7 +191,7 @@ export default function HomePage() {
             <div className="hidden lg:block">
               <div className="glass-card overflow-hidden">
                 <div className="h-[320px] w-full" style={{
-                  backgroundImage: "/images/aethladoctor.jpeg",
+                  backgroundImage: "url('/images/aethladoctor.jpeg')",
                   backgroundSize: 'cover', backgroundPosition: 'center',
                 }} />
                 <div className="p-5">
@@ -249,7 +249,7 @@ export default function HomePage() {
         <div className="container-max">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <div className="h-[460px] rounded-4xl" style={{
-              backgroundImage: "/images/aethladoctor2.jpg",
+              backgroundImage: "url('/images/aethladoctor2.jpg')",
               backgroundSize: 'cover', backgroundPosition: 'center',
               boxShadow: '0 20px 60px rgba(27,107,138,0.16)',
             }} />
