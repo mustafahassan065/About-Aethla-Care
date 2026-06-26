@@ -41,10 +41,10 @@ const staticFaqs = [
 
 // Slideshow images for hero background — replace with client images as needed
 const heroSlides = [
-  'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=1920&q=80&auto=format&fit=crop',
-  'https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=1920&q=80&auto=format&fit=crop',
-  'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=1920&q=80&auto=format&fit=crop',
-  'https://images.unsplash.com/photo-1516627145497-ae6968895b74?w=1920&q=80&auto=format&fit=crop',
+  '/images/slide1.webp',
+  '/images/slide2.webp',
+  '/images/slide3.webp',
+  
 ]
 
 function HeroSlideshow() {
