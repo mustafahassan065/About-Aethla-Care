@@ -2,25 +2,21 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Eye, EyeOff, Lock, Mail, Phone, Shield } from 'lucide-react'
+import { Eye, EyeOff, Lock, Mail, Phone } from 'lucide-react'
 import { useAuthStore } from '@/lib/auth'
 
 type Tab = 'login' | 'signup'
 
 export default function AdminLoginPage() {
-  const [tab, setTab]           = useState<Tab>('login')
-  const [showPw, setShowPw]     = useState(false)
-  const [error, setError]       = useState('')
-  const [success, setSuccess]   = useState(false)
-  const [showPin, setShowPin]   = useState(false)
-  const [pin, setPin]           = useState('')
-  const [pinError, setPinError] = useState('')
-  const [pinLoading, setPinLoading] = useState(false)
+  const [tab, setTab]         = useState<Tab>('login')
+  const [showPw, setShowPw]   = useState(false)
+  const [error, setError]     = useState('')
+  const [success, setSuccess] = useState(false)
 
   const { login, isLoading } = useAuthStore()
   const router = useRouter()
 
-  const [loginForm, setLoginForm] = useState({ email: '', password: '' })
+  const [loginForm, setLoginForm]   = useState({ email: '', password: '' })
   const [signupForm, setSignupForm] = useState({
     firstName: '', lastName: '', email: '', phone: '', password: '', confirmPassword: '',
   })
@@ -30,16 +26,7 @@ export default function AdminLoginPage() {
     setError('')
     try {
       const { role } = await login(loginForm.email, loginForm.password)
-
-      // Get user from store — typed as any to avoid isSuperAdmin TS error
-      const storeUser = useAuthStore.getState().user as any
-
       if (role === 'admin' || role === 'coordinator' || role === 'accountant') {
-        // Super admin — show PIN prompt
-        if (storeUser?.isSuperAdmin === true) {
-          setShowPin(true)
-          return
-        }
         router.replace('/admin/dashboard')
       } else if (role === 'caregiver') {
         router.replace('/employee/dashboard')
@@ -54,45 +41,11 @@ export default function AdminLoginPage() {
     }
   }
 
-  const handlePinSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setPinError('')
-    setPinLoading(true)
-    try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/verify-pin`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${useAuthStore.getState().token}`,
-        },
-        body: JSON.stringify({ pin }),
-      })
-      const data = await res.json()
-      if (!res.ok || !data.valid) {
-        setPinError('Incorrect PIN. Try again.')
-        setPin('')
-        return
-      }
-      sessionStorage.setItem('superAdminVerified', 'true')
-      router.replace('/admin/dashboard')
-    } catch {
-      setPinError('PIN verification failed. Please try again.')
-    } finally {
-      setPinLoading(false)
-    }
-  }
-
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
-    if (signupForm.password !== signupForm.confirmPassword) {
-      setError('Passwords do not match.')
-      return
-    }
-    if (signupForm.password.length < 8) {
-      setError('Password must be at least 8 characters.')
-      return
-    }
+    if (signupForm.password !== signupForm.confirmPassword) { setError('Passwords do not match.'); return }
+    if (signupForm.password.length < 8) { setError('Password must be at least 8 characters.'); return }
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/public/admin-signup`, {
         method: 'POST',
@@ -113,46 +66,6 @@ export default function AdminLoginPage() {
     }
   }
 
-  // PIN Modal
-  if (showPin) {
-    return (
-      <div className="min-h-screen flex items-center justify-center px-4"
-        style={{ background: 'linear-gradient(165deg, #0D2B3E 0%, #134F66 60%, #1B6B8A 100%)' }}>
-        <div className="bg-white rounded-3xl p-10 shadow-2xl w-full max-w-sm text-center">
-          <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-5"
-            style={{ background: 'rgba(27,107,138,0.1)' }}>
-            <Shield size={28} style={{ color: '#1B6B8A' }} />
-          </div>
-          <h2 className="text-heading-xl font-poppins text-neutral-800 mb-2">Super Admin PIN</h2>
-          <p className="text-body-sm text-neutral-500 mb-6">
-            Enter your PIN to access super admin features. You can skip to continue with standard admin access.
-          </p>
-          <form onSubmit={handlePinSubmit} className="space-y-4">
-            <input
-              type="password"
-              value={pin}
-              onChange={e => setPin(e.target.value)}
-              className="form-input text-center text-2xl tracking-widest"
-              placeholder="• • • •"
-              maxLength={8}
-              autoComplete="off"
-              autoFocus
-            />
-            {pinError && <p className="text-body-sm text-red-500">{pinError}</p>}
-            <button type="submit" disabled={pinLoading || !pin} className="btn-primary btn-lg w-full">
-              {pinLoading ? 'Verifying...' : 'Verify PIN'}
-            </button>
-            <button type="button" onClick={() => router.replace('/admin/dashboard')}
-              className="text-body-sm text-neutral-400 hover:text-neutral-600 w-full py-2">
-              Skip — Continue as standard admin
-            </button>
-          </form>
-        </div>
-      </div>
-    )
-  }
-
-  // Success
   if (success) {
     return (
       <div className="min-h-screen flex items-center justify-center px-4"
@@ -202,47 +115,33 @@ export default function AdminLoginPage() {
             {/* LOGIN */}
             {tab === 'login' && (
               <form onSubmit={handleLogin} className="space-y-4" autoComplete="off">
-                {/* Hidden fields to prevent browser autocomplete */}
                 <input type="text" style={{ display: 'none' }} autoComplete="username" readOnly />
                 <input type="password" style={{ display: 'none' }} autoComplete="new-password" readOnly />
-
                 <div>
                   <label className="form-label">Email Address <span className="text-red-500">*</span></label>
                   <div className="relative">
                     <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400" />
-                    <input
-                      type="email"
-                      value={loginForm.email}
+                    <input type="email" value={loginForm.email}
                       onChange={e => setLoginForm(p => ({ ...p, email: e.target.value }))}
-                      className="form-input pl-10"
-                      placeholder="admin@aethlacare.com"
-                      required
-                      autoComplete="off"
-                    />
+                      className="form-input pl-10" placeholder="admin@aethlacare.com"
+                      required autoComplete="off" />
                   </div>
                 </div>
                 <div>
                   <label className="form-label">Password <span className="text-red-500">*</span></label>
                   <div className="relative">
                     <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400" />
-                    <input
-                      type={showPw ? 'text' : 'password'}
-                      value={loginForm.password}
+                    <input type={showPw ? 'text' : 'password'} value={loginForm.password}
                       onChange={e => setLoginForm(p => ({ ...p, password: e.target.value }))}
-                      className="form-input pl-10 pr-10"
-                      placeholder="••••••••"
-                      required
-                      autoComplete="new-password"
-                    />
+                      className="form-input pl-10 pr-10" placeholder="••••••••"
+                      required autoComplete="new-password" />
                     <button type="button" onClick={() => setShowPw(!showPw)}
                       className="absolute right-3.5 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600">
                       {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
                     </button>
                   </div>
                 </div>
-
                 {error && <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3"><p className="text-body-sm text-red-600">{error}</p></div>}
-
                 <button type="submit" disabled={isLoading} className="btn-primary btn-lg w-full">
                   {isLoading ? 'Signing in...' : 'Sign In'}
                 </button>
@@ -297,9 +196,7 @@ export default function AdminLoginPage() {
                       className="form-input" placeholder="Repeat" required autoComplete="new-password" />
                   </div>
                 </div>
-
                 {error && <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3"><p className="text-body-sm text-red-600">{error}</p></div>}
-
                 <div className="p-3 rounded-xl bg-amber-50 border border-amber-200">
                   <p className="text-caption text-amber-700">Your request will be reviewed by an existing administrator before access is granted.</p>
                 </div>
