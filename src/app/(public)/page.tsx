@@ -40,9 +40,9 @@ const staticFaqs = [
 ]
 
 const heroSlides = [
-  '/images/slide1.webp',
-  '/images/slide2.webp',
-  '/images/slide3.webp',
+  '/images/slide (1).jpeg',
+  '/images/slide (2).jpeg',
+  '/images/slide (3).jpeg',
 ]
 
 function HeroSlideshow() {
