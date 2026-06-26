@@ -8,24 +8,29 @@ import { PageHeader, StatusBadge } from '@/components/ui/index'
 import { DataTable, Column } from '@/components/ui/DataTable'
 import { X, RotateCcw } from 'lucide-react'
 
-type SignupType = 'employee' | 'patient'
+type SignupType = 'admin' | 'employee' | 'patient'
 type LastAction = { id: string; type: SignupType; action: string }
 
 export default function SignupRequestsPage() {
   const qc = useQueryClient()
-  const [activeTab, setActiveTab]   = useState<SignupType>('employee')
+  const [activeTab, setActiveTab]   = useState<SignupType>('admin')
   const [status, setStatus]         = useState('')
   const [page, setPage]             = useState(1)
   const [selected, setSelected]     = useState<any>(null)
   const [clientId, setClientId]     = useState('')
   const [lastAction, setLastAction] = useState<LastAction | null>(null)
 
+  const endpointMap: Record<SignupType, string> = {
+    admin:    '/public/admin-signups',
+    employee: '/public/employee-signups',
+    patient:  '/public/patient-signups',
+  }
+
   const { data, isLoading } = useQuery({
     queryKey: ['signups', activeTab, status, page],
-    queryFn: () => apiClient.get(
-      activeTab === 'employee' ? '/public/employee-signups' : '/public/patient-signups',
-      { params: { ...(status ? { status } : {}), page, limit: 20 } }
-    ).then(r => r.data),
+    queryFn: () => apiClient.get(endpointMap[activeTab], {
+      params: { ...(status ? { status } : {}), page, limit: 20 }
+    }).then(r => r.data),
   })
 
   const { data: clientsList } = useQuery({
@@ -36,8 +41,7 @@ export default function SignupRequestsPage() {
 
   const approveMutation = useMutation({
     mutationFn: ({ id, clientId }: { id: string; clientId?: string }) =>
-      apiClient.post(
-        activeTab === 'patient' ? `/public/patient-signups/${id}/approve` : `/public/employee-signups/${id}/approve`,
+      apiClient.post(`${endpointMap[activeTab]}/${id}/approve`,
         activeTab === 'patient' ? { clientId } : {}
       ).then(r => r.data),
     onSuccess: (_, vars) => {
@@ -49,26 +53,21 @@ export default function SignupRequestsPage() {
     onError: (e: any) => toast.error(e?.response?.data?.message || 'Failed to approve'),
   })
 
-  const rejectMutation = useMutation({
-    mutationFn: (id: string) =>
-      apiClient.patch(
-        activeTab === 'patient' ? `/public/patient-signups/${id}` : `/public/employee-signups/${id}`,
-        { status: 'rejected' }
-      ).then(r => r.data),
-    onSuccess: (_, id) => {
+  const updateMutation = useMutation({
+    mutationFn: ({ id, status }: { id: string; status: string }) =>
+      apiClient.patch(`${endpointMap[activeTab]}/${id}`, { status }).then(r => r.data),
+    onSuccess: (_, vars) => {
       qc.invalidateQueries({ queryKey: ['signups'] })
-      setLastAction({ id, type: activeTab, action: 'rejected' })
-      toast.success('Request rejected', { duration: 6000 })
+      setLastAction({ id: vars.id, type: activeTab, action: vars.status })
+      toast.success(`Status updated to ${vars.status}`, { duration: 6000 })
       setSelected(null)
     },
-    onError: () => toast.error('Failed to reject'),
+    onError: () => toast.error('Failed to update'),
   })
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) =>
-      apiClient.delete(
-        activeTab === 'patient' ? `/public/patient-signups/${id}` : `/public/employee-signups/${id}`
-      ).then(r => r.data),
+      apiClient.delete(`${endpointMap[activeTab]}/${id}`).then(r => r.data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['signups'] })
       toast.success('Deleted permanently')
@@ -77,32 +76,16 @@ export default function SignupRequestsPage() {
     onError: () => toast.error('Failed to delete'),
   })
 
-  const undoMutation = useMutation({
-    mutationFn: ({ id, type }: { id: string; type: SignupType }) =>
-      apiClient.patch(
-        type === 'patient' ? `/public/patient-signups/${id}` : `/public/employee-signups/${id}`,
-        { status: 'pending' }
-      ).then(r => r.data),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['signups'] })
-      toast.success('Action undone — reverted to pending')
-      setLastAction(null)
-    },
-    onError: () => toast.error('Failed to undo'),
-  })
+  const PortalBadge = ({ type }: { type: SignupType }) => {
+    const map = {
+      admin:    { label: 'Admin Portal',    color: 'bg-purple-50 text-purple-600'  },
+      employee: { label: 'Employee Portal', color: 'bg-blue-50 text-blue-600'    },
+      patient:  { label: 'Patient Portal',  color: 'bg-amber-50 text-amber-600'  },
+    }
+    return <span className={`px-2 py-1 rounded-full text-caption font-semibold ${map[type].color}`}>{map[type].label}</span>
+  }
 
-  // Portal badge — shows which portal the person signed up from
-  const PortalBadge = ({ type }: { type: SignupType }) => (
-    <span className={`px-2 py-1 rounded-full text-caption font-semibold ${
-      type === 'employee'
-        ? 'bg-blue-50 text-blue-600'
-        : 'bg-amber-50 text-amber-600'
-    }`}>
-      {type === 'employee' ? 'Employee Portal' : 'Patient Portal'}
-    </span>
-  )
-
-  const employeeColumns: Column<any>[] = [
+  const commonColumns = (type: SignupType): Column<any>[] => [
     {
       key: 'firstName', header: 'Applicant',
       render: (_, r) => (
@@ -113,15 +96,16 @@ export default function SignupRequestsPage() {
         </div>
       )
     },
-    {
-      key: '_portal', header: 'Requested Access To',
-      render: () => <PortalBadge type="employee" />
-    },
-    { key: 'specialization', header: 'Specialization', render: (v) => <span className="text-body-sm text-neutral-700">{String(v || '—')}</span> },
-    { key: 'licenseNumber',  header: 'License',        render: (v) => <span className="font-mono text-xs text-neutral-600">{String(v || '—')}</span> },
-    { key: 'experience',     header: 'Experience',     render: (v) => <span className="text-caption text-neutral-500">{String(v || '—')}</span> },
-    { key: 'status',         header: 'Status',         render: (v) => <StatusBadge status={String(v)} /> },
-    { key: 'createdAt',      header: 'Applied',        render: (v) => <span className="text-caption text-neutral-400">{new Date(String(v)).toLocaleDateString()}</span> },
+    { key: '_portal', header: 'Portal', render: () => <PortalBadge type={type} /> },
+    ...(type === 'employee' ? [
+      { key: 'specialization', header: 'Specialization', render: (v: any) => <span className="text-body-sm text-neutral-700">{String(v || '—')}</span> },
+      { key: 'licenseNumber',  header: 'License',        render: (v: any) => <span className="font-mono text-xs text-neutral-600">{String(v || '—')}</span> },
+    ] : []),
+    ...(type === 'patient' ? [
+      { key: 'accountType', header: 'Account Type', render: (v: any) => <span className="badge-primary capitalize text-xs">{String(v)}</span> },
+    ] : []),
+    { key: 'status', header: 'Status', render: (v: any) => <StatusBadge status={String(v)} /> },
+    { key: 'createdAt', header: 'Applied', render: (v: any) => <span className="text-caption text-neutral-400">{new Date(String(v)).toLocaleDateString()}</span> },
     {
       key: '_id', header: 'Actions',
       render: (_, r) => (
@@ -134,48 +118,15 @@ export default function SignupRequestsPage() {
     },
   ]
 
-  const patientColumns: Column<any>[] = [
-    {
-      key: 'firstName', header: 'Applicant',
-      render: (_, r) => (
-        <div>
-          <strong className="text-body-sm font-semibold text-neutral-800">{r.firstName} {r.lastName}</strong>
-          <p className="text-caption text-neutral-400">{r.email}</p>
-          <p className="text-caption text-neutral-400">{r.phone || '—'}</p>
-        </div>
-      )
-    },
-    {
-      key: '_portal', header: 'Requested Access To',
-      render: () => <PortalBadge type="patient" />
-    },
-    { key: 'accountType', header: 'Account Type', render: (v) => <span className="badge-primary capitalize text-xs">{String(v)}</span> },
-    {
-      key: 'isSelf', header: 'For Patient',
-      render: (_, r) => r.isSelf
-        ? <span className="text-body-sm text-neutral-600">Themselves</span>
-        : <div><span className="text-body-sm text-neutral-600">{r.patientFirstName} {r.patientLastName}</span><p className="text-caption text-neutral-400">({r.relationship})</p></div>
-    },
-    { key: 'status',    header: 'Status',  render: (v) => <StatusBadge status={String(v)} /> },
-    { key: 'createdAt', header: 'Applied', render: (v) => <span className="text-caption text-neutral-400">{new Date(String(v)).toLocaleDateString()}</span> },
-    {
-      key: '_id', header: 'Actions',
-      render: (_, r) => (
-        <div className="flex gap-2">
-          <button onClick={() => setSelected(r)} className="btn-outline btn-sm py-1 px-3 text-xs">Review</button>
-          <button onClick={() => { if (confirm('Delete permanently?')) deleteMutation.mutate(r._id) }}
-            className="text-red-400 hover:text-red-600 text-caption font-semibold px-2 py-1">Delete</button>
-        </div>
-      )
-    },
+  const tabs = [
+    { k: 'admin'    as SignupType, l: 'Admin Portal Requests',    color: 'bg-purple-50 text-purple-600' },
+    { k: 'employee' as SignupType, l: 'Employee Portal Requests', color: 'bg-blue-50 text-blue-600'   },
+    { k: 'patient'  as SignupType, l: 'Patient Portal Requests',  color: 'bg-amber-50 text-amber-600' },
   ]
 
   return (
     <div>
-      <PageHeader
-        title="Signup Requests"
-        subtitle="Review and approve new employee and patient applications"
-      />
+      <PageHeader title="Signup Requests" subtitle="Review and approve access requests from all portals" />
 
       {/* Undo Banner */}
       {lastAction && (
@@ -185,8 +136,8 @@ export default function SignupRequestsPage() {
             Last action: <strong className="capitalize">{lastAction.action}</strong> a {lastAction.type} request.
           </p>
           <button
-            onClick={() => undoMutation.mutate({ id: lastAction.id, type: lastAction.type })}
-            disabled={undoMutation.isPending}
+            onClick={() => updateMutation.mutate({ id: lastAction.id, status: 'pending' })}
+            disabled={updateMutation.isPending}
             className="flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-100 text-amber-700 font-semibold text-body-sm hover:bg-amber-200 transition-all"
           >
             <RotateCcw size={15} /> Undo Action
@@ -194,18 +145,13 @@ export default function SignupRequestsPage() {
         </div>
       )}
 
-      {/* Tabs — Employee Portal vs Patient Portal */}
-      <div className="flex gap-1 mb-5 border-b border-neutral-200">
-        {([
-          { k: 'employee', l: 'Employee Portal Requests', color: 'bg-blue-50 text-blue-600'   },
-          { k: 'patient',  l: 'Patient Portal Requests',  color: 'bg-amber-50 text-amber-600' },
-        ] as const).map(t => (
+      {/* Tabs */}
+      <div className="flex gap-1 mb-5 border-b border-neutral-200 overflow-x-auto">
+        {tabs.map(t => (
           <button key={t.k} onClick={() => { setActiveTab(t.k); setPage(1); setStatus('') }}
-            className={`px-4 py-2.5 text-body-sm font-semibold rounded-t-xl transition-all -mb-px border-b-2 ${
+            className={`px-4 py-2.5 text-body-sm font-semibold rounded-t-xl transition-all -mb-px border-b-2 whitespace-nowrap ${
               activeTab === t.k ? 'text-primary-500 border-primary-500 bg-primary-50' : 'text-neutral-500 border-transparent hover:text-neutral-700'
-            }`}>
-            {t.l}
-          </button>
+            }`}>{t.l}</button>
         ))}
       </div>
 
@@ -222,7 +168,7 @@ export default function SignupRequestsPage() {
       </div>
 
       <DataTable
-        columns={activeTab === 'employee' ? employeeColumns : patientColumns}
+        columns={commonColumns(activeTab)}
         data={data?.data ?? []}
         isLoading={isLoading}
         total={data?.total ?? 0}
@@ -230,7 +176,7 @@ export default function SignupRequestsPage() {
         limit={20}
         onPageChange={setPage}
         rowKey={r => r._id}
-        emptyMessage={`No ${activeTab === 'employee' ? 'employee' : 'patient'} portal signup requests.`}
+        emptyMessage={`No ${activeTab} portal signup requests.`}
       />
 
       {/* Review Modal */}
@@ -248,27 +194,23 @@ export default function SignupRequestsPage() {
 
             <div className="p-6 space-y-4">
               <dl className="space-y-3">
-                {(activeTab === 'employee' ? [
-                  ['Name',           `${selected.firstName} ${selected.lastName}`],
-                  ['Email',          selected.email],
-                  ['Phone',          selected.phone || '—'],
-                  ['Portal',         'Employee Portal'],
-                  ['Specialization', selected.specialization || '—'],
-                  ['License No.',    selected.licenseNumber || '—'],
-                  ['Experience',     selected.experience || '—'],
-                  ['Applied',        new Date(selected.createdAt).toLocaleString()],
-                  ['Status',         selected.status],
-                ] : [
-                  ['Name',         `${selected.firstName} ${selected.lastName}`],
-                  ['Email',        selected.email],
-                  ['Phone',        selected.phone || '—'],
-                  ['Portal',       'Patient Portal'],
-                  ['Account Type', selected.accountType],
-                  ['For Patient',  selected.isSelf ? 'Themselves' : `${selected.patientFirstName} ${selected.patientLastName}`],
-                  ['Relationship', selected.isSelf ? 'Self' : selected.relationship],
-                  ['Applied',      new Date(selected.createdAt).toLocaleString()],
-                  ['Status',       selected.status],
-                ]).map(([k, v]) => (
+                {[
+                  ['Name',   `${selected.firstName} ${selected.lastName}`],
+                  ['Email',  selected.email],
+                  ['Phone',  selected.phone || '—'],
+                  ['Portal', activeTab === 'admin' ? 'Administration Portal' : activeTab === 'employee' ? 'Employee Portal' : 'Patient Portal'],
+                  ...(activeTab === 'employee' ? [
+                    ['Specialization', selected.specialization || '—'],
+                    ['License',        selected.licenseNumber  || '—'],
+                    ['Experience',     selected.experience     || '—'],
+                  ] : []),
+                  ...(activeTab === 'patient' ? [
+                    ['Account Type', selected.accountType],
+                    ['For Patient',  selected.isSelf ? 'Themselves' : `${selected.patientFirstName} ${selected.patientLastName}`],
+                  ] : []),
+                  ['Applied', new Date(selected.createdAt).toLocaleString()],
+                  ['Status',  selected.status],
+                ].map(([k, v]) => (
                   <div key={k} className="flex justify-between py-2 border-b border-neutral-50 last:border-0">
                     <dt className="text-body-sm text-neutral-400">{k}</dt>
                     <dd className="text-body-sm font-semibold text-neutral-700 capitalize text-right max-w-[60%]">{v}</dd>
@@ -276,11 +218,10 @@ export default function SignupRequestsPage() {
                 ))}
               </dl>
 
-              {/* Link to client — patient only */}
+              {/* Client link for patient */}
               {activeTab === 'patient' && selected.status === 'pending' && (
                 <div>
                   <label className="form-label">Link to Client Record (Optional)</label>
-                  <p className="text-caption text-neutral-400 mb-2">Select the client this user will track in the family portal</p>
                   <select value={clientId} onChange={e => setClientId(e.target.value)} className="form-input">
                     <option value="">No client link — can link later</option>
                     {(clientsList?.data || []).map((c: any) => (
@@ -290,7 +231,7 @@ export default function SignupRequestsPage() {
                 </div>
               )}
 
-              {/* Approve / Reject */}
+              {/* Actions */}
               {selected.status === 'pending' && (
                 <div className="flex gap-3 pt-2">
                   <button
@@ -301,8 +242,7 @@ export default function SignupRequestsPage() {
                     {approveMutation.isPending ? 'Approving...' : 'Approve & Create Account'}
                   </button>
                   <button
-                    onClick={() => rejectMutation.mutate(selected._id)}
-                    disabled={rejectMutation.isPending}
+                    onClick={() => updateMutation.mutate({ id: selected._id, status: 'rejected' })}
                     className="px-5 py-3 rounded-xl border border-red-200 text-red-500 font-semibold hover:bg-red-50 transition-all"
                   >
                     Reject
@@ -310,7 +250,6 @@ export default function SignupRequestsPage() {
                 </div>
               )}
 
-              {/* Undo from modal */}
               {selected.status !== 'pending' && (
                 <div className="space-y-3">
                   <div className="p-4 rounded-xl" style={{
@@ -321,7 +260,7 @@ export default function SignupRequestsPage() {
                     }}>Status: {selected.status}</p>
                   </div>
                   <button
-                    onClick={() => { undoMutation.mutate({ id: selected._id, type: activeTab }); setSelected(null) }}
+                    onClick={() => { updateMutation.mutate({ id: selected._id, status: 'pending' }); setSelected(null) }}
                     className="flex items-center gap-2 w-full justify-center py-2.5 rounded-xl border border-amber-200 text-amber-600 font-semibold hover:bg-amber-50 transition-all"
                   >
                     <RotateCcw size={15} /> Undo — Revert to Pending
@@ -329,12 +268,11 @@ export default function SignupRequestsPage() {
                 </div>
               )}
 
-              {/* Delete */}
               <button
-                onClick={() => { if (confirm('Permanently delete this request?')) { deleteMutation.mutate(selected._id); setSelected(null) } }}
+                onClick={() => { if (confirm('Permanently delete?')) { deleteMutation.mutate(selected._id); setSelected(null) } }}
                 className="w-full py-2.5 rounded-xl border border-red-100 text-red-400 text-body-sm font-semibold hover:bg-red-50 transition-all"
               >
-                Delete Request Permanently
+                Delete Permanently
               </button>
             </div>
           </div>
