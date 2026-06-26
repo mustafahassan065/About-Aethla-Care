@@ -39,12 +39,10 @@ const staticFaqs = [
   { q: 'What is the family portal?',                                       a: 'The family portal gives family members secure online access to view schedules, read care notes, check billing, and communicate with the care team.' },
 ]
 
-// Slideshow images for hero background — replace with client images as needed
 const heroSlides = [
   '/images/slide1.webp',
   '/images/slide2.webp',
   '/images/slide3.webp',
-  
 ]
 
 function HeroSlideshow() {
@@ -66,7 +64,6 @@ function HeroSlideshow() {
 
   return (
     <div className="absolute inset-0 overflow-hidden">
-      {/* Previous slide — stays visible during fade */}
       {prev !== null && (
         <div
           key={`prev-${prev}`}
@@ -75,12 +72,10 @@ function HeroSlideshow() {
             backgroundImage: `url('${heroSlides[prev]}')`,
             backgroundSize: 'cover',
             backgroundPosition: 'center',
-            opacity: 0.18,
-            mixBlendMode: 'luminosity',
+            opacity: 0.55,
           }}
         />
       )}
-      {/* Current slide */}
       <div
         key={`curr-${current}`}
         className="absolute inset-0 transition-opacity"
@@ -88,13 +83,11 @@ function HeroSlideshow() {
           backgroundImage: `url('${heroSlides[current]}')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
-          opacity: fading ? 0 : 0.18,
-          mixBlendMode: 'luminosity',
+          opacity: fading ? 0 : 0.55,
           transitionDuration: '800ms',
           transitionTimingFunction: 'ease-in-out',
         }}
       />
-      {/* Slide indicators */}
       <div className="absolute bottom-6 right-8 flex gap-2 z-10">
         {heroSlides.map((_, i) => (
           <button
@@ -165,11 +158,7 @@ export default function HomePage() {
       {/* HERO */}
       <section className="relative min-h-[calc(100vh-76px)] flex items-center overflow-hidden">
         <div className="absolute inset-0 bg-hero-gradient" />
-
-        {/* Dynamic sliding background images */}
         <HeroSlideshow />
-
-        {/* Dot pattern overlay */}
         <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '40px 40px' }} />
 
         <div className="container-max px-4 md:px-8 relative z-10 py-16">
@@ -190,15 +179,15 @@ export default function HomePage() {
             </div>
             <div className="hidden lg:block">
               <div className="glass-card overflow-hidden">
-  <div className="h-[600px] w-full" style={{
-    backgroundImage: "url('/images/aethladoctor.jpeg')",
-    backgroundSize: 'cover', backgroundPosition: 'center top',
-  }} />
-  <div className="p-5">
-    <p className="text-body-sm font-semibold font-poppins text-white mb-1">Trusted by Families Across Qatar</p>
-    <p className="text-caption text-white/60">Professional home healthcare at every stage of life</p>
-  </div>
-</div>
+                <div className="h-[600px] w-full" style={{
+                  backgroundImage: "url('/images/aethladoctor.jpeg')",
+                  backgroundSize: 'cover', backgroundPosition: 'center top',
+                }} />
+                <div className="p-5">
+                  <p className="text-body-sm font-semibold font-poppins text-white mb-1">Trusted by Families Across Qatar</p>
+                  <p className="text-caption text-white/60">Professional home healthcare at every stage of life</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -264,10 +253,10 @@ export default function HomePage() {
               </p>
               <div className="flex flex-col gap-3">
                 {[
-                  { title: 'Licensed Care Professionals',   desc: 'Every caregiver is Ministry of Health verified and background checked.'        },
-                  { title: 'AI-Powered Caregiver Matching', desc: 'We match caregivers by language, skills, availability, and cultural fit.'      },
-                  { title: 'Secure Family Portal',          desc: 'Real-time access to schedules, care notes, and billing from any device.'       },
-                  { title: 'Multilingual Care Teams',       desc: 'Support in Arabic, English, Tagalog, Hindi, Urdu, and more.'                   },
+                  { title: 'Licensed Care Professionals',   desc: 'Every caregiver is Ministry of Health verified and background checked.' },
+                  { title: 'AI-Powered Caregiver Matching', desc: 'We match caregivers by language, skills, availability, and cultural fit.' },
+                  { title: 'Secure Family Portal',          desc: 'Real-time access to schedules, care notes, and billing from any device.' },
+                  { title: 'Multilingual Care Teams',       desc: 'Support in Arabic, English, Tagalog, Hindi, Urdu, and more.' },
                 ].map((f) => (
                   <div key={f.title} className="card p-4 flex gap-4 items-start">
                     <div className="w-2 h-2 rounded-full bg-accent-400 flex-shrink-0 mt-2" />
@@ -345,7 +334,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* FAQ — Dynamic from CMS, fallback to static */}
       <FAQSection />
     </>
   )
