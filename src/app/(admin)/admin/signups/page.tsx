@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import apiClient from '@/lib/api'
+import { useAuthStore } from '@/lib/auth'
 import { PageHeader, StatusBadge } from '@/components/ui/index'
 import { DataTable, Column } from '@/components/ui/DataTable'
 import { X, RotateCcw } from 'lucide-react'
@@ -13,6 +14,9 @@ type LastAction = { id: string; type: SignupType; action: string }
 
 export default function SignupRequestsPage() {
   const qc = useQueryClient()
+  const { user } = useAuthStore()
+  const isSuperAdmin = (user as any)?.isSuperAdmin === true
+
   const [activeTab, setActiveTab]   = useState<SignupType>('admin')
   const [status, setStatus]         = useState('')
   const [page, setPage]             = useState(1)
@@ -59,7 +63,7 @@ export default function SignupRequestsPage() {
     onSuccess: (_, vars) => {
       qc.invalidateQueries({ queryKey: ['signups'] })
       setLastAction({ id: vars.id, type: activeTab, action: vars.status })
-      toast.success(`Status updated to ${vars.status}`, { duration: 6000 })
+      toast.success(`Status updated`, { duration: 6000 })
       setSelected(null)
     },
     onError: () => toast.error('Failed to update'),
@@ -78,7 +82,7 @@ export default function SignupRequestsPage() {
 
   const PortalBadge = ({ type }: { type: SignupType }) => {
     const map = {
-      admin:    { label: 'Admin Portal',    color: 'bg-purple-50 text-purple-600'  },
+      admin:    { label: 'Admin Portal',    color: 'bg-purple-50 text-purple-600' },
       employee: { label: 'Employee Portal', color: 'bg-blue-50 text-blue-600'    },
       patient:  { label: 'Patient Portal',  color: 'bg-amber-50 text-amber-600'  },
     }
@@ -104,24 +108,27 @@ export default function SignupRequestsPage() {
     ...(type === 'patient' ? [
       { key: 'accountType', header: 'Account Type', render: (v: any) => <span className="badge-primary capitalize text-xs">{String(v)}</span> },
     ] : []),
-    { key: 'status', header: 'Status', render: (v: any) => <StatusBadge status={String(v)} /> },
+    { key: 'status',    header: 'Status',  render: (v: any) => <StatusBadge status={String(v)} /> },
     { key: 'createdAt', header: 'Applied', render: (v: any) => <span className="text-caption text-neutral-400">{new Date(String(v)).toLocaleDateString()}</span> },
     {
       key: '_id', header: 'Actions',
       render: (_, r) => (
         <div className="flex gap-2">
           <button onClick={() => setSelected(r)} className="btn-outline btn-sm py-1 px-3 text-xs">Review</button>
-          <button onClick={() => { if (confirm('Delete permanently?')) deleteMutation.mutate(r._id) }}
-            className="text-red-400 hover:text-red-600 text-caption font-semibold px-2 py-1">Delete</button>
+          {/* Delete only for Super Admin */}
+          {isSuperAdmin && (
+            <button onClick={() => { if (confirm('Delete permanently?')) deleteMutation.mutate(r._id) }}
+              className="text-red-400 hover:text-red-600 text-caption font-semibold px-2 py-1">Delete</button>
+          )}
         </div>
       )
     },
   ]
 
   const tabs = [
-    { k: 'admin'    as SignupType, l: 'Admin Portal Requests',    color: 'bg-purple-50 text-purple-600' },
-    { k: 'employee' as SignupType, l: 'Employee Portal Requests', color: 'bg-blue-50 text-blue-600'   },
-    { k: 'patient'  as SignupType, l: 'Patient Portal Requests',  color: 'bg-amber-50 text-amber-600' },
+    { k: 'admin'    as SignupType, l: 'Admin Portal Requests'    },
+    { k: 'employee' as SignupType, l: 'Employee Portal Requests' },
+    { k: 'patient'  as SignupType, l: 'Patient Portal Requests'  },
   ]
 
   return (
@@ -231,7 +238,7 @@ export default function SignupRequestsPage() {
                 </div>
               )}
 
-              {/* Actions */}
+              {/* Approve / Reject */}
               {selected.status === 'pending' && (
                 <div className="flex gap-3 pt-2">
                   <button
@@ -268,12 +275,15 @@ export default function SignupRequestsPage() {
                 </div>
               )}
 
-              <button
-                onClick={() => { if (confirm('Permanently delete?')) { deleteMutation.mutate(selected._id); setSelected(null) } }}
-                className="w-full py-2.5 rounded-xl border border-red-100 text-red-400 text-body-sm font-semibold hover:bg-red-50 transition-all"
-              >
-                Delete Permanently
-              </button>
+              {/* Delete — Super Admin only */}
+              {isSuperAdmin && (
+                <button
+                  onClick={() => { if (confirm('Permanently delete?')) { deleteMutation.mutate(selected._id); setSelected(null) } }}
+                  className="w-full py-2.5 rounded-xl border border-red-100 text-red-400 text-body-sm font-semibold hover:bg-red-50 transition-all"
+                >
+                  Delete Permanently
+                </button>
+              )}
             </div>
           </div>
         </div>
