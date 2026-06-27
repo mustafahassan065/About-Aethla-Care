@@ -8,6 +8,7 @@ import apiClient from '@/lib/api'
 import { PageHeader, StatusBadge, Avatar } from '@/components/ui/index'
 import { DataTable, Column } from '@/components/ui/DataTable'
 import { X, Eye, EyeOff, RotateCcw } from 'lucide-react'
+import { useAuthStore } from '@/lib/auth'
 
 const roles = [
   { value: 'admin',       label: 'Admin',         desc: 'Full system access',                           portal: '/admin/login'    },
@@ -21,6 +22,8 @@ type LastAction = { id: string; action: 'deactivated' | 'activated' | 'deleted';
 
 export default function UsersPage() {
   const qc = useQueryClient()
+  const { user: currentUser } = useAuthStore()
+  const isSuperAdmin = (currentUser as any)?.isSuperAdmin === true
   const [showForm, setShowForm]         = useState(false)
   const [showPw, setShowPw]             = useState(false)
   const [filterRole, setFilterRole]     = useState('')
@@ -144,18 +147,25 @@ export default function UsersPage() {
       key: '_id', header: 'Actions',
       render: (_, row) => (
         <div className="flex gap-2 flex-wrap">
-          <button
-            onClick={() => toggleMutation.mutate({ id: row._id, isActive: !row.isActive })}
-            className={`btn-sm py-1 px-3 text-xs ${row.isActive ? 'btn-outline text-amber-500 border-amber-200 hover:bg-amber-50' : 'btn-primary'}`}
-          >
-            {row.isActive ? 'Deactivate' : 'Activate'}
-          </button>
-          <button
-            onClick={() => { if (confirm(`Permanently delete ${row.firstName}? This cannot be undone.`)) deleteMutation.mutate(row._id) }}
-            className="btn-sm py-1 px-3 text-xs border border-red-200 text-red-400 rounded-lg hover:bg-red-50 transition-all"
-          >
-            Delete
-          </button>
+          {isSuperAdmin && (
+            <button
+              onClick={() => toggleMutation.mutate({ id: row._id, isActive: !row.isActive })}
+              className={`btn-sm py-1 px-3 text-xs ${row.isActive ? 'btn-outline text-amber-500 border-amber-200 hover:bg-amber-50' : 'btn-primary'}`}
+            >
+              {row.isActive ? 'Deactivate' : 'Activate'}
+            </button>
+          )}
+          {isSuperAdmin && (
+            <button
+              onClick={() => { if (confirm(`Permanently delete ${row.firstName}? This cannot be undone.`)) deleteMutation.mutate(row._id) }}
+              className="btn-sm py-1 px-3 text-xs border border-red-200 text-red-400 rounded-lg hover:bg-red-50 transition-all"
+            >
+              Delete
+            </button>
+          )}
+          {!isSuperAdmin && (
+            <span className="text-caption text-neutral-400">View only</span>
+          )}
         </div>
       )
     },

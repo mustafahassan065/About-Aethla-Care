@@ -2,189 +2,175 @@
 
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuthStore } from '@/lib/auth'
 import apiClient from '@/lib/api'
-import { PageHeader } from '@/components/ui/index'
+import { PageHeader, StatusBadge } from '@/components/ui/index'
 import toast from 'react-hot-toast'
-import Link from 'next/link'
+import { Plus, X } from 'lucide-react'
 
 export default function EmployeeCareNotes() {
   const { user } = useAuthStore()
-  const router = useRouter()
-  const searchParams = useSearchParams()
   const qc = useQueryClient()
-  const [showForm, setShowForm] = useState(!!searchParams.get('clientId'))
-
+  const [showForm, setShowForm] = useState(false)
   const [form, setForm] = useState({
-    clientId:     searchParams.get('clientId') || '',
-    caregiverId:  '',
-    visitDate:    new Date().toISOString().split('T')[0],
-    mood:         'good',
-    summary:      '',
-    observations: '',
-    tasksCompleted: '',
-    familyShared: true,
+    visitDate: '', summary: '', mood: 'good', vitals: '',
+    familyShared: false, notes: '',
   })
 
-  const set = (k: string, v: string | boolean) => setForm(p => ({ ...p, [k]: v }))
-
-  // Get this caregiver's record
-  const { data: cgData } = useQuery({
-    queryKey: ['employee', 'caregiver-record'],
-    queryFn: () => apiClient.get(`/caregivers?userId=${user?._id}&limit=1`).then(r => r.data),
+  const { data: cg } = useQuery({
+    queryKey: ['my-cg', user?._id],
+    queryFn: () => apiClient.get('/caregivers/me').then(r => r.data),
     enabled: !!user,
   })
-  const cg = cgData?.data?.[0]
 
-  // Get past notes by this caregiver
-  const { data: notes, isLoading } = useQuery({
-    queryKey: ['employee', 'notes', cg?._id],
+  const { data, isLoading } = useQuery({
+    queryKey: ['my-notes', cg?._id],
     queryFn: () => apiClient.get(`/care-notes?caregiverId=${cg._id}&limit=30`).then(r => r.data),
     enabled: !!cg?._id,
   })
 
-  // Get my clients for dropdown
-  const { data: schedules } = useQuery({
-    queryKey: ['employee', 'schedules-all'],
-    queryFn: () => apiClient.get(`/schedules?caregiverId=${cg._id}&limit=100`).then(r => r.data),
-    enabled: !!cg?._id,
+  const { data: clients } = useQuery({
+    queryKey: ['my-clients-list', cg?._id],
+    queryFn: () => apiClient.get(`/clients?caregiverId=${cg._id}&limit=100`).then(r => r.data),
+    enabled: !!cg?._id && showForm,
   })
-  const myClients = (schedules?.data || [])
-    .map((s: any) => s.clientId)
-    .filter((c: any, i: number, arr: any[]) => c && arr.findIndex((x: any) => x?._id === c?._id) === i)
 
-  const createNote = useMutation({
-    mutationFn: (payload: any) => apiClient.post('/care-notes', payload),
+  const createMutation = useMutation({
+    mutationFn: (dto: any) => apiClient.post('/care-notes', dto).then(r => r.data),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['employee', 'notes'] })
-      toast.success('Care note saved successfully')
+      qc.invalidateQueries({ queryKey: ['my-notes'] })
+      toast.success('Care note added')
       setShowForm(false)
-      setForm(p => ({ ...p, summary: '', observations: '', tasksCompleted: '' }))
+      setForm({ visitDate: '', summary: '', mood: 'good', vitals: '', familyShared: false, notes: '' })
     },
-    onError: () => toast.error('Failed to save care note'),
+    onError: () => toast.error('Failed to add note'),
   })
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!form.clientId || !form.summary) { toast.error('Client and summary are required'); return }
-    createNote.mutate({
-      clientId:   form.clientId,
-      caregiverId: cg?._id,
-      visitDate:  form.visitDate,
-      mood:       form.mood,
-      summary:    form.summary,
-      observations: form.observations,
-      tasksCompleted: form.tasksCompleted.split('\n').filter(Boolean),
-      familyShared: form.familyShared,
-    })
-  }
-
-  const moodOptions = [
-    { value: 'excellent', label: 'Excellent' },
-    { value: 'good',      label: 'Good'      },
-    { value: 'fair',      label: 'Fair'      },
-    { value: 'poor',      label: 'Poor'      },
-  ]
+  const notes = data?.data || []
 
   return (
     <div>
       <PageHeader
         title="Care Notes"
-        subtitle="Document visits and share updates with families"
+        subtitle="Document your visit observations and notes"
         action={
-          <button onClick={() => setShowForm(!showForm)} className="btn-primary btn-sm">
-            {showForm ? 'Cancel' : '+ New Note'}
+          <button onClick={() => setShowForm(true)} className="btn-primary btn-sm flex items-center gap-2">
+            <Plus size={15} /> Add Note
           </button>
         }
       />
 
-      {/* New Note Form */}
+      {isLoading ? (
+        <div className="space-y-3">{[1,2,3].map(i => <div key={i} className="skeleton h-24 rounded-2xl" />)}</div>
+      ) : notes.length === 0 ? (
+        <div className="card p-12 text-center">
+          <p className="text-body-md text-neutral-400 mb-4">No care notes yet.</p>
+          <button onClick={() => setShowForm(true)} className="btn-primary btn-sm">+ Add Your First Note</button>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {notes.map((note: any) => (
+            <div key={note._id} className="card p-5">
+              <div className="flex items-start justify-between gap-4 mb-3">
+                <div>
+                  <p className="text-body-sm font-bold font-poppins text-neutral-800">{note.visitDate}</p>
+                  <p className="text-caption text-neutral-400">
+                    {note.clientId?.firstName} {note.clientId?.lastName}
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <span className={`px-2 py-1 rounded-full text-caption font-semibold capitalize ${
+                    note.mood === 'good' || note.mood === 'excellent' ? 'bg-green-50 text-green-600' :
+                    note.mood === 'fair' ? 'bg-amber-50 text-amber-600' : 'bg-red-50 text-red-600'
+                  }`}>{note.mood}</span>
+                  {note.familyShared && <span className="px-2 py-1 rounded-full text-caption font-semibold bg-blue-50 text-blue-600">Shared</span>}
+                </div>
+              </div>
+              <p className="text-body-sm text-neutral-600 leading-relaxed">{note.summary}</p>
+              {note.notes && (
+                <div className="mt-3 p-3 rounded-xl bg-neutral-50">
+                  <p className="text-caption text-neutral-400 mb-1">Additional Notes</p>
+                  <p className="text-body-sm text-neutral-600">{note.notes}</p>
+                </div>
+              )}
+              {note.vitals && (
+                <div className="mt-2 p-3 rounded-xl" style={{ background: 'rgba(27,107,138,0.06)' }}>
+                  <p className="text-caption text-primary-600 mb-1">Vitals</p>
+                  <p className="text-body-sm text-neutral-700">{note.vitals}</p>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Add Note Modal */}
       {showForm && (
-        <div className="card p-6 mb-6">
-          <h3 className="text-heading-md font-poppins mb-5">New Care Note</h3>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowForm(false)} />
+          <div className="relative bg-white rounded-3xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-neutral-100">
+              <h3 className="text-heading-md font-poppins">Add Care Note</h3>
+              <button onClick={() => setShowForm(false)} className="p-2 rounded-xl text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100"><X size={18} /></button>
+            </div>
+            <div className="p-6 space-y-4">
               <div>
-                <label className="form-label">Client <span className="text-red-500">*</span></label>
-                <select value={form.clientId} onChange={e => set('clientId', e.target.value)} className="form-input" required>
+                <label className="form-label">Client</label>
+                <select className="form-input" onChange={e => setForm(p => ({ ...p, clientId: e.target.value }))}>
                   <option value="">Select client...</option>
-                  {myClients.map((c: any) => (
+                  {(clients?.data || []).map((c: any) => (
                     <option key={c._id} value={c._id}>{c.firstName} {c.lastName}</option>
                   ))}
                 </select>
               </div>
-              <div>
-                <label className="form-label">Visit Date</label>
-                <input type="date" value={form.visitDate} onChange={e => set('visitDate', e.target.value)} className="form-input" />
-              </div>
-              <div>
-                <label className="form-label">Client Mood</label>
-                <select value={form.mood} onChange={e => set('mood', e.target.value)} className="form-input">
-                  {moodOptions.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
-                </select>
-              </div>
-              <div className="flex items-center gap-3 pt-5">
-                <input type="checkbox" id="shared" checked={form.familyShared as boolean}
-                  onChange={e => set('familyShared', e.target.checked)}
-                  className="w-5 h-5 rounded accent-primary-500" />
-                <label htmlFor="shared" className="text-body-sm font-medium text-neutral-700 cursor-pointer">
-                  Share with family portal
-                </label>
-              </div>
-            </div>
-            <div>
-              <label className="form-label">Visit Summary <span className="text-red-500">*</span></label>
-              <textarea value={form.summary} onChange={e => set('summary', e.target.value)}
-                className="form-input min-h-[80px] resize-y" placeholder="Brief summary of the visit..." required />
-            </div>
-            <div>
-              <label className="form-label">Observations</label>
-              <textarea value={form.observations} onChange={e => set('observations', e.target.value)}
-                className="form-input min-h-[80px] resize-y" placeholder="Clinical observations, concerns, behaviour..." />
-            </div>
-            <div>
-              <label className="form-label">Tasks Completed (one per line)</label>
-              <textarea value={form.tasksCompleted} onChange={e => set('tasksCompleted', e.target.value)}
-                className="form-input min-h-[70px] resize-y" placeholder={`Bathing\nMedication given\nMeal prepared`} />
-            </div>
-            <button type="submit" disabled={createNote.isPending} className="btn-primary btn-lg w-full">
-              {createNote.isPending ? 'Saving...' : 'Save Care Note'}
-            </button>
-          </form>
-        </div>
-      )}
-
-      {/* Notes List */}
-      {isLoading ? (
-        <div className="space-y-3">{[1,2,3].map(i => <div key={i} className="skeleton h-24 rounded-2xl" />)}</div>
-      ) : (notes?.data || []).length === 0 ? (
-        <div className="card p-16 text-center">
-          <p className="text-body-md text-neutral-400">No care notes yet. Submit your first note above.</p>
-        </div>
-      ) : (
-        <div className="space-y-3">
-          {(notes?.data || []).map((note: any) => (
-            <div key={note._id} className="card p-5">
-              <div className="flex items-start justify-between mb-2">
+              <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <p className="text-body-sm font-bold font-poppins text-neutral-800">
-                    {note.clientId?.firstName} {note.clientId?.lastName}
-                  </p>
-                  <p className="text-caption text-neutral-400">{note.visitDate} &middot; Mood: {note.mood}</p>
+                  <label className="form-label">Visit Date <span className="text-red-500">*</span></label>
+                  <input type="date" value={form.visitDate} onChange={e => setForm(p => ({ ...p, visitDate: e.target.value }))}
+                    className="form-input" required />
                 </div>
-                <div className="flex gap-2">
-                  {note.familyShared && (
-                    <span className="badge-accent text-xs">Shared</span>
-                  )}
+                <div>
+                  <label className="form-label">Mood / Condition</label>
+                  <select value={form.mood} onChange={e => setForm(p => ({ ...p, mood: e.target.value }))} className="form-input">
+                    <option value="excellent">Excellent</option>
+                    <option value="good">Good</option>
+                    <option value="fair">Fair</option>
+                    <option value="poor">Poor</option>
+                  </select>
                 </div>
               </div>
-              <p className="text-body-sm text-neutral-600 leading-relaxed">{note.summary}</p>
-              {note.tasksCompleted?.length > 0 && (
-                <p className="text-caption text-neutral-400 mt-2">{note.tasksCompleted.length} tasks completed</p>
-              )}
+              <div>
+                <label className="form-label">Visit Summary <span className="text-red-500">*</span></label>
+                <textarea value={form.summary} onChange={e => setForm(p => ({ ...p, summary: e.target.value }))}
+                  className="form-input min-h-[80px] resize-y" placeholder="Describe the visit and client condition..." required />
+              </div>
+              <div>
+                <label className="form-label">Additional Notes</label>
+                <textarea value={form.notes} onChange={e => setForm(p => ({ ...p, notes: e.target.value }))}
+                  className="form-input min-h-[60px] resize-y" placeholder="Any extra observations or personal notes..." />
+              </div>
+              <div>
+                <label className="form-label">Vitals (optional)</label>
+                <input value={form.vitals} onChange={e => setForm(p => ({ ...p, vitals: e.target.value }))}
+                  className="form-input" placeholder="BP: 120/80, Temp: 37°C, HR: 72bpm" />
+              </div>
+              <label className="flex items-center gap-3 cursor-pointer p-3 rounded-xl hover:bg-neutral-50">
+                <input type="checkbox" checked={form.familyShared} onChange={e => setForm(p => ({ ...p, familyShared: e.target.checked }))}
+                  className="w-5 h-5 accent-primary-500" />
+                <div>
+                  <p className="text-body-sm font-semibold text-neutral-700">Share with Family</p>
+                  <p className="text-caption text-neutral-400">Family can view this note in their portal</p>
+                </div>
+              </label>
+              <button
+                onClick={() => createMutation.mutate({ ...form, caregiverId: cg?._id })}
+                disabled={createMutation.isPending || !form.visitDate || !form.summary}
+                className="btn-primary btn-lg w-full"
+              >
+                {createMutation.isPending ? 'Saving...' : 'Save Care Note'}
+              </button>
             </div>
-          ))}
+          </div>
         </div>
       )}
     </div>
