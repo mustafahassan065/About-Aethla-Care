@@ -5,18 +5,26 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 import toast from 'react-hot-toast'
 import apiClient from '@/lib/api'
+import { useAuthStore } from '@/lib/auth'
 import { PageHeader, StatusBadge, Avatar } from '@/components/ui/index'
 import { DataTable, Column } from '@/components/ui/DataTable'
 import { X, Eye, EyeOff, RotateCcw } from 'lucide-react'
-import { useAuthStore } from '@/lib/auth'
 
 const roles = [
-  { value: 'admin',       label: 'Admin',         desc: 'Full system access',                           portal: '/admin/login'    },
-  { value: 'coordinator', label: 'Coordinator',    desc: 'Scheduling & client management',               portal: '/admin/login'    },
-  { value: 'caregiver',   label: 'Caregiver',      desc: 'Employee portal — care delivery',              portal: '/employee/login' },
-  { value: 'family',      label: 'Family Member',  desc: 'Family portal — view their client only',       portal: '/portal/login'   },
-  { value: 'accountant',  label: 'Accountant',     desc: 'Finance module — billing & reports',           portal: '/admin/login'    },
+  { value: 'admin',       label: 'Admin',         desc: 'Full system access',                   portal: '/admin/login'    },
+  { value: 'coordinator', label: 'Coordinator',    desc: 'Scheduling & client management',       portal: '/admin/login'    },
+  { value: 'caregiver',   label: 'Caregiver',      desc: 'Employee portal — care delivery',      portal: '/employee/login' },
+  { value: 'family',      label: 'Family Member',  desc: 'Family portal — view their client',    portal: '/portal/login'   },
+  { value: 'accountant',  label: 'Accountant',     desc: 'Finance module — billing & reports',   portal: '/admin/login'    },
 ]
+
+// Show actual account type for family users
+const getDisplayRole = (user: any) => {
+  if (user.role === 'family' && user.accountType) {
+    return user.accountType.charAt(0).toUpperCase() + user.accountType.slice(1)
+  }
+  return roles.find(r => r.value === user.role)?.label || user.role
+}
 
 type LastAction = { id: string; action: 'deactivated' | 'activated' | 'deleted'; prevState: boolean }
 
@@ -24,6 +32,7 @@ export default function UsersPage() {
   const qc = useQueryClient()
   const { user: currentUser } = useAuthStore()
   const isSuperAdmin = (currentUser as any)?.isSuperAdmin === true
+
   const [showForm, setShowForm]         = useState(false)
   const [showPw, setShowPw]             = useState(false)
   const [filterRole, setFilterRole]     = useState('')
@@ -60,7 +69,6 @@ export default function UsersPage() {
     onError: (e: any) => toast.error(e?.response?.data?.message || 'Failed to create user'),
   })
 
-  // Deactivate / Activate
   const toggleMutation = useMutation({
     mutationFn: ({ id, isActive }: { id: string; isActive: boolean }) =>
       apiClient.patch(`/users/${id}`, { isActive }).then(r => r.data),
@@ -72,7 +80,6 @@ export default function UsersPage() {
     onError: () => toast.error('Failed to update user'),
   })
 
-  // Delete user
   const deleteMutation = useMutation({
     mutationFn: (id: string) => apiClient.delete(`/users/${id}`).then(r => r.data),
     onSuccess: () => {
@@ -83,7 +90,6 @@ export default function UsersPage() {
     onError: () => toast.error('Failed to delete user'),
   })
 
-  // Undo — toggle back
   const undoMutation = useMutation({
     mutationFn: ({ id, prevState }: { id: string; prevState: boolean }) =>
       apiClient.patch(`/users/${id}`, { isActive: prevState }).then(r => r.data),
@@ -119,11 +125,10 @@ export default function UsersPage() {
       )
     },
     {
-      key: 'role', header: 'Role',
-      render: (v) => {
-        const r = roles.find(r => r.value === v)
-        return <span className="badge-primary text-xs capitalize">{r?.label || String(v)}</span>
-      }
+      key: 'role', header: 'Role / Type',
+      render: (_, row) => (
+        <span className="badge-primary text-xs capitalize">{getDisplayRole(row)}</span>
+      )
     },
     {
       key: 'linkedClient', header: 'Linked Client',
@@ -147,23 +152,22 @@ export default function UsersPage() {
       key: '_id', header: 'Actions',
       render: (_, row) => (
         <div className="flex gap-2 flex-wrap">
-          {isSuperAdmin && (
-            <button
-              onClick={() => toggleMutation.mutate({ id: row._id, isActive: !row.isActive })}
-              className={`btn-sm py-1 px-3 text-xs ${row.isActive ? 'btn-outline text-amber-500 border-amber-200 hover:bg-amber-50' : 'btn-primary'}`}
-            >
-              {row.isActive ? 'Deactivate' : 'Activate'}
-            </button>
-          )}
-          {isSuperAdmin && (
-            <button
-              onClick={() => { if (confirm(`Permanently delete ${row.firstName}? This cannot be undone.`)) deleteMutation.mutate(row._id) }}
-              className="btn-sm py-1 px-3 text-xs border border-red-200 text-red-400 rounded-lg hover:bg-red-50 transition-all"
-            >
-              Delete
-            </button>
-          )}
-          {!isSuperAdmin && (
+          {isSuperAdmin ? (
+            <>
+              <button
+                onClick={() => toggleMutation.mutate({ id: row._id, isActive: !row.isActive })}
+                className={`btn-sm py-1 px-3 text-xs ${row.isActive ? 'btn-outline text-amber-500 border-amber-200 hover:bg-amber-50' : 'btn-primary'}`}
+              >
+                {row.isActive ? 'Deactivate' : 'Activate'}
+              </button>
+              <button
+                onClick={() => { if (confirm(`Permanently delete ${row.firstName}?`)) deleteMutation.mutate(row._id) }}
+                className="btn-sm py-1 px-3 text-xs border border-red-200 text-red-400 rounded-lg hover:bg-red-50 transition-all"
+              >
+                Delete
+              </button>
+            </>
+          ) : (
             <span className="text-caption text-neutral-400">View only</span>
           )}
         </div>
@@ -179,29 +183,23 @@ export default function UsersPage() {
         action={<button onClick={() => setShowForm(true)} className="btn-primary btn-sm">+ Create User</button>}
       />
 
-      {/* Undo Banner */}
       {lastAction && (
         <div className="card p-4 mb-5 flex items-center justify-between gap-4"
           style={{ background: '#FFF8E1', borderLeft: '4px solid #F59E0B' }}>
-          <p className="text-body-sm text-amber-700">
-            Last action: User <strong>{lastAction.action}</strong>.
-          </p>
-          <button
-            onClick={() => undoMutation.mutate({ id: lastAction.id, prevState: lastAction.prevState })}
+          <p className="text-body-sm text-amber-700">Last action: User <strong>{lastAction.action}</strong>.</p>
+          <button onClick={() => undoMutation.mutate({ id: lastAction.id, prevState: lastAction.prevState })}
             disabled={undoMutation.isPending}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-100 text-amber-700 font-semibold text-body-sm hover:bg-amber-200 transition-all"
-          >
+            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-100 text-amber-700 font-semibold text-body-sm hover:bg-amber-200 transition-all">
             <RotateCcw size={15} /> Undo Action
           </button>
         </div>
       )}
 
-      {/* Portal Guide */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         {[
           { portal: 'Admin Panel',     url: '/admin/login',    roles: 'Admin, Coordinator, Accountant', color: '#1B6B8A' },
           { portal: 'Employee Portal', url: '/employee/login', roles: 'Caregiver, Coordinator',         color: '#2DA88A' },
-          { portal: 'Family Portal',   url: '/portal/login',   roles: 'Family Member',                  color: '#C9A84C' },
+          { portal: 'Family Portal',   url: '/portal/login',   roles: 'Patient, Guardian, Representative, Carer', color: '#C9A84C' },
         ].map(p => (
           <div key={p.portal} className="card p-4" style={{ borderLeft: `4px solid ${p.color}` }}>
             <p className="text-body-sm font-bold font-poppins text-neutral-800 mb-0.5">{p.portal}</p>
@@ -213,7 +211,6 @@ export default function UsersPage() {
         ))}
       </div>
 
-      {/* Filter */}
       <div className="card p-4 mb-5">
         <div className="flex gap-2 flex-wrap">
           {[{ v: '', l: 'All Users' }, ...roles.map(r => ({ v: r.value, l: r.label }))].map(f => (
@@ -237,7 +234,6 @@ export default function UsersPage() {
         emptyMessage="No users found."
       />
 
-      {/* Create User Modal */}
       {showForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={closeForm} />
@@ -273,11 +269,9 @@ export default function UsersPage() {
                   {roles.map(r => <option key={r.value} value={r.value}>{r.label} — {r.desc}</option>)}
                 </select>
               </div>
-
               {watchRole === 'family' && (
                 <div className="p-4 rounded-2xl" style={{ background: 'rgba(201,168,76,0.08)', border: '1px solid rgba(201,168,76,0.3)' }}>
-                  <label className="form-label">Link to Client <span className="text-red-500">*</span></label>
-                  <p className="text-caption text-neutral-400 mb-2">Select the client this family member will track in the portal</p>
+                  <label className="form-label">Link to Client</label>
                   <select {...register('clientId')} className="form-input">
                     <option value="">Select client...</option>
                     {(clientsList || []).map((c: any) => (
@@ -286,7 +280,6 @@ export default function UsersPage() {
                   </select>
                 </div>
               )}
-
               <div>
                 <label className="form-label">Password <span className="text-red-500">*</span></label>
                 <div className="relative">
@@ -298,7 +291,6 @@ export default function UsersPage() {
                   </button>
                 </div>
               </div>
-
               {watchRole && (
                 <div className="p-3 rounded-xl" style={{ background: 'var(--color-primary-light)' }}>
                   <p className="text-caption text-primary-700">
@@ -306,7 +298,6 @@ export default function UsersPage() {
                   </p>
                 </div>
               )}
-
               <button type="submit" disabled={isSubmitting || createMutation.isPending} className="btn-primary btn-lg w-full">
                 {isSubmitting || createMutation.isPending ? 'Creating...' : 'Create User'}
               </button>

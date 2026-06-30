@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { Eye, EyeOff, Lock, Mail, Phone } from 'lucide-react'
 import { useAuthStore } from '@/lib/auth'
 
@@ -51,18 +52,15 @@ export default function AdminLoginPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          firstName: signupForm.firstName,
-          lastName:  signupForm.lastName,
-          email:     signupForm.email,
-          phone:     signupForm.phone,
-          password:  signupForm.password,
+          firstName: signupForm.firstName, lastName: signupForm.lastName,
+          email: signupForm.email, phone: signupForm.phone, password: signupForm.password,
         }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.message || 'Signup failed')
       setSuccess(true)
     } catch (err: any) {
-      setError(err.message || 'Registration failed. Please try again.')
+      setError(err.message || 'Registration failed.')
     }
   }
 
@@ -77,7 +75,7 @@ export default function AdminLoginPage() {
             </svg>
           </div>
           <h2 className="text-heading-xl font-poppins text-neutral-800 mb-3">Request Submitted</h2>
-          <p className="text-body-md text-neutral-500 mb-2">Your admin access request is pending approval from an existing administrator.</p>
+          <p className="text-body-md text-neutral-500 mb-2">Your admin access request is pending approval.</p>
           <p className="text-body-sm text-neutral-400 mb-6">You will be notified at <strong>{signupForm.email}</strong> once reviewed.</p>
           <button onClick={() => { setSuccess(false); setTab('login') }} className="btn-outline btn-sm">Back to Login</button>
         </div>
@@ -112,7 +110,6 @@ export default function AdminLoginPage() {
           </div>
 
           <div className="p-8">
-            {/* LOGIN */}
             {tab === 'login' && (
               <form onSubmit={handleLogin} className="space-y-4" autoComplete="off">
                 <input type="text" style={{ display: 'none' }} autoComplete="username" readOnly />
@@ -123,8 +120,7 @@ export default function AdminLoginPage() {
                     <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400" />
                     <input type="email" value={loginForm.email}
                       onChange={e => setLoginForm(p => ({ ...p, email: e.target.value }))}
-                      className="form-input pl-10" placeholder="admin@aethlacare.com"
-                      required autoComplete="off" />
+                      className="form-input pl-10" placeholder="admin@aethlacare.com" required autoComplete="off" />
                   </div>
                 </div>
                 <div>
@@ -133,8 +129,7 @@ export default function AdminLoginPage() {
                     <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400" />
                     <input type={showPw ? 'text' : 'password'} value={loginForm.password}
                       onChange={e => setLoginForm(p => ({ ...p, password: e.target.value }))}
-                      className="form-input pl-10 pr-10" placeholder="••••••••"
-                      required autoComplete="new-password" />
+                      className="form-input pl-10 pr-10" placeholder="••••••••" required autoComplete="new-password" />
                     <button type="button" onClick={() => setShowPw(!showPw)}
                       className="absolute right-3.5 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600">
                       {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
@@ -145,14 +140,13 @@ export default function AdminLoginPage() {
                 <button type="submit" disabled={isLoading} className="btn-primary btn-lg w-full">
                   {isLoading ? 'Signing in...' : 'Sign In'}
                 </button>
-                <p className="text-caption text-neutral-400 text-center">
-                  Need admin access?{' '}
-                  <button type="button" onClick={() => setTab('signup')} className="text-primary-500 hover:underline font-semibold">Request here</button>
-                </p>
+                <div className="flex items-center justify-between text-caption">
+                  <Link href="/admin/forgot-password" className="text-primary-500 hover:underline">Forgot password?</Link>
+                  <button type="button" onClick={() => setTab('signup')} className="text-neutral-400 hover:text-neutral-600">Request access</button>
+                </div>
               </form>
             )}
 
-            {/* SIGNUP */}
             {tab === 'signup' && (
               <form onSubmit={handleSignup} className="space-y-4" autoComplete="off">
                 <p className="text-body-sm text-neutral-400 mb-2">Request admin access. Your request will be reviewed by an existing administrator.</p>
@@ -169,7 +163,7 @@ export default function AdminLoginPage() {
                   </div>
                 </div>
                 <div>
-                  <label className="form-label">Email Address <span className="text-red-500">*</span></label>
+                  <label className="form-label">Email <span className="text-red-500">*</span></label>
                   <div className="relative">
                     <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400" />
                     <input type="email" value={signupForm.email} onChange={e => setSignupForm(p => ({ ...p, email: e.target.value }))}
@@ -177,7 +171,7 @@ export default function AdminLoginPage() {
                   </div>
                 </div>
                 <div>
-                  <label className="form-label">Phone Number <span className="text-red-500">*</span></label>
+                  <label className="form-label">Phone <span className="text-red-500">*</span></label>
                   <div className="relative">
                     <Phone size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400" />
                     <input type="tel" value={signupForm.phone} onChange={e => setSignupForm(p => ({ ...p, phone: e.target.value }))}
@@ -198,12 +192,12 @@ export default function AdminLoginPage() {
                 </div>
                 {error && <div className="bg-red-50 border border-red-200 rounded-xl px-4 py-3"><p className="text-body-sm text-red-600">{error}</p></div>}
                 <div className="p-3 rounded-xl bg-amber-50 border border-amber-200">
-                  <p className="text-caption text-amber-700">Your request will be reviewed by an existing administrator before access is granted.</p>
+                  <p className="text-caption text-amber-700">Your request will be reviewed before access is granted.</p>
                 </div>
                 <button type="submit" className="btn-primary btn-lg w-full">Submit Access Request</button>
                 <p className="text-caption text-neutral-400 text-center">
                   Already have an account?{' '}
-                  <button type="button" onClick={() => setTab('login')} className="text-primary-500 hover:underline font-semibold">Sign in here</button>
+                  <button type="button" onClick={() => setTab('login')} className="text-primary-500 hover:underline font-semibold">Sign in</button>
                 </p>
               </form>
             )}

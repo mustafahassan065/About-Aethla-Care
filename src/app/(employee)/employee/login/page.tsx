@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { Eye, EyeOff, Lock, Mail, Phone, FileText } from 'lucide-react'
 import { useAuthStore } from '@/lib/auth'
 
@@ -154,6 +155,9 @@ export default function EmployeeLoginPage() {
                 <button type="submit" disabled={isLoading} className="btn-primary btn-lg w-full">
                   {isLoading ? 'Signing in...' : 'Sign In'}
                 </button>
+                <p className="text-caption text-neutral-400 text-center">
+                  <Link href="/employee/forgot-password" className="text-primary-500 hover:underline">Forgot password?</Link>
+                </p>
               </form>
             )}
 

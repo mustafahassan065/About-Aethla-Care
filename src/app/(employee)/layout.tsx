@@ -4,9 +4,10 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Menu, X, LogOut, Bell } from 'lucide-react'
+import { Menu, X, LogOut } from 'lucide-react'
 import { useAuthStore } from '@/lib/auth'
 import { AdminGuard } from '@/components/shared/AdminGuard'
+import { NotificationBell } from '@/components/shared/NotificationBell'
 
 const navItems = [
   { href: '/employee/dashboard',      label: 'My Dashboard'    },
@@ -86,10 +87,7 @@ function EmployeeContent({ children }: { children: React.ReactNode }) {
           </button>
           <span className="text-body-sm font-semibold text-neutral-600">Employee Portal</span>
           <div className="ml-auto">
-            <button className="relative p-2 rounded-xl text-neutral-600 hover:bg-neutral-100">
-              <Bell size={20} />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-red-500" />
-            </button>
+            <NotificationBell />
           </div>
         </header>
         <main className="flex-1 p-4 md:p-6 lg:p-8">{children}</main>
@@ -100,7 +98,15 @@ function EmployeeContent({ children }: { children: React.ReactNode }) {
 
 export default function EmployeeLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
-  if (pathname === '/employee/login') return <>{children}</>
+
+  if (
+    pathname === '/employee/login' ||
+    pathname === '/employee/forgot-password' ||
+    pathname === '/employee/reset-password'
+  ) {
+    return <>{children}</>
+  }
+
   return (
     <AdminGuard allowedRoles={['caregiver', 'coordinator']} redirectTo="/employee/login">
       <EmployeeContent>{children}</EmployeeContent>

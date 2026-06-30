@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Eye, EyeOff, Lock, Mail, Phone } from 'lucide-react'
+import Link from 'next/link'
 import { useAuthStore } from '@/lib/auth'
 
 type Tab = 'login' | 'signup'
@@ -163,6 +164,9 @@ export default function PatientPortalPage() {
                 <button type="submit" disabled={isLoading} className="btn-primary btn-lg w-full">
                   {isLoading ? 'Signing in...' : 'Sign In'}
                 </button>
+                <p className="text-caption text-neutral-400 text-center">
+                  <Link href="/portal/forgot-password" className="text-primary-500 hover:underline">Forgot password?</Link>
+                </p>
                 <p className="text-caption text-neutral-400 text-center">
                   No account?{' '}
                   <button type="button" onClick={() => setTab('signup')} className="text-primary-500 hover:underline font-semibold">Create one here</button>

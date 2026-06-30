@@ -4,8 +4,9 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Menu, X, Bell, LogOut, Settings } from 'lucide-react'
+import { Menu, X, LogOut, Settings } from 'lucide-react'
 import { AdminGuard } from '@/components/shared/AdminGuard'
+import { NotificationBell } from '@/components/shared/NotificationBell'
 import { useAuthStore } from '@/lib/auth'
 
 const sidebarNav = [
@@ -135,7 +136,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const pathname = usePathname()
 
-  if (pathname === '/admin/login') return <>{children}</>
+  // Public auth pages — no guard, no sidebar
+  if (
+    pathname === '/admin/login' ||
+    pathname === '/admin/forgot-password' ||
+    pathname === '/admin/reset-password'
+  ) {
+    return <>{children}</>
+  }
 
   return (
     <AdminGuard allowedRoles={['admin', 'coordinator', 'accountant']} redirectTo="/admin/login">
@@ -147,10 +155,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <Menu size={22} />
             </button>
             <div className="ml-auto flex items-center gap-2">
-              <button className="relative p-2 rounded-xl text-neutral-600 hover:bg-neutral-100">
-                <Bell size={20} />
-                <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-red-500" />
-              </button>
+              <NotificationBell />
               <Link href="/admin/settings" className="p-2 rounded-xl text-neutral-600 hover:bg-neutral-100">
                 <Settings size={20} />
               </Link>

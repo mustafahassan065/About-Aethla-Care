@@ -4,9 +4,10 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Menu, X, LogOut, Bell } from 'lucide-react'
+import { Menu, X, LogOut } from 'lucide-react'
 import { useAuthStore } from '@/lib/auth'
 import { AdminGuard } from '@/components/shared/AdminGuard'
+import { NotificationBell } from '@/components/shared/NotificationBell'
 
 const navItems = [
   { href: '/portal/dashboard',  label: 'Overview'        },
@@ -88,10 +89,7 @@ function PortalContent({ children }: { children: React.ReactNode }) {
           </button>
           <span className="text-body-sm font-semibold text-neutral-600">Family Portal</span>
           <div className="ml-auto">
-            <button className="relative p-2 rounded-xl text-neutral-600 hover:bg-neutral-100">
-              <Bell size={20} />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-red-500" />
-            </button>
+            <NotificationBell />
           </div>
         </header>
         <main className="flex-1 p-4 md:p-6 lg:p-8">{children}</main>
@@ -102,7 +100,15 @@ function PortalContent({ children }: { children: React.ReactNode }) {
 
 export default function CustomerLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
-  if (pathname === '/portal/login') return <>{children}</>
+
+  if (
+    pathname === '/portal/login' ||
+    pathname === '/portal/forgot-password' ||
+    pathname === '/portal/reset-password'
+  ) {
+    return <>{children}</>
+  }
+
   return (
     <AdminGuard allowedRoles={['family']} redirectTo="/portal/login">
       <PortalContent>{children}</PortalContent>
